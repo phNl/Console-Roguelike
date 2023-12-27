@@ -1,0 +1,137 @@
+﻿using System.Drawing;
+using System.Numerics;
+using System.Runtime.CompilerServices;
+using System.Security.Cryptography.X509Certificates;
+
+namespace RogueLike.CustomMath
+{
+    internal struct Vector2Int
+    {
+        public int x;
+        public int y;
+
+        public static Vector2Int Zero => new Vector2Int(0, 0);
+        public static Vector2Int Up => new Vector2Int(0, -1);
+        public static Vector2Int Down => new Vector2Int(0, 1);
+        public static Vector2Int Right => new Vector2Int(1, 0);
+        public static Vector2Int Left => new Vector2Int(-1, 0);
+
+        public Vector2Int(int x, int y)
+        {
+            this.x = x;
+            this.y = y;
+        }
+
+        public Vector2Int(int x) : this(x, x)
+        {
+        }
+
+        public Vector2Int() : this(0, 0)
+        {
+        }
+
+        public static implicit operator Vector2Int(Vector2Float vector2Float)
+        {
+            return new Vector2Int((int)vector2Float.x, (int)vector2Float.y);
+        }
+
+        public static explicit operator Vector2Float(Vector2Int vector2Int)
+        {
+            return new Vector2Float(vector2Int.x, vector2Int.y);
+        }
+
+        public static bool operator ==(Vector2Int left, Vector2Int right)
+        {
+            return (left.x == right.x) 
+                && (left.y == right.y);
+        }
+
+        public static bool operator !=(Vector2Int left, Vector2Int right)
+        {
+            return !(left == right);
+        }
+
+        public static Vector2Int operator -(Vector2Int value)
+        {
+            return new Vector2Int(-value.x, -value.y);
+        }
+
+        public static Vector2Int operator +(Vector2Int left, Vector2Int right)
+        {
+            return new Vector2Int(left.x + right.x, left.y + right.y);
+        }
+
+        public static Vector2Int operator +(Vector2Int left, int right)
+        {
+            return new Vector2Int(left.x + right, left.y + right);
+        }
+        
+        public static Vector2Int operator +(int left, Vector2Int right)
+        {
+            return right + left;
+        }
+
+        public static Vector2Int operator -(Vector2Int left, Vector2Int right)
+        {
+            return new Vector2Int(left.x - right.x, left.y - right.y);
+        }
+
+        public static Vector2Int operator -(Vector2Int left, int right)
+        {
+            return new Vector2Int(left.x - right, left.y - right);
+        }
+
+        public static Vector2Int operator *(Vector2Int left, Vector2Int right)
+        {
+            return new Vector2Int(left.x * right.x, left.y * right.y);
+        }
+
+        public static Vector2Int operator *(Vector2Int left, int right)
+        {
+            return new Vector2Int(left.x * right, left.y * right);
+        }
+
+        public static Vector2Int operator *(int left, Vector2Int right)
+        {
+            return right * left;
+        }
+
+        public static Vector2Int operator /(Vector2Int left, Vector2Int right)
+        {
+            return new Vector2Int(left.x / right.x, left.y / right.y);
+        }
+
+        public static Vector2Int operator /(Vector2Int left, int right)
+        {
+            return new Vector2Int(left.x / right, left.y / right);
+        }
+
+        public override bool Equals(object? obj)
+        {
+            if ((obj == null) || !GetType().Equals(obj.GetType()))
+            {
+                return false;
+            }
+            else
+            {
+                Vector2Int other = (Vector2Int)obj;
+                return this == other;
+            }
+        }
+
+        public override int GetHashCode()
+        {
+            throw new NotImplementedException();
+        }
+
+        public static Vector2Int Abs(Vector2Int vector)
+        {
+            return new Vector2Int(Math.Abs(vector.x), Math.Abs(vector.y));
+        }
+
+        public Vector2Int Abs()
+        {
+            return Abs(this);
+        }
+    }
+}
