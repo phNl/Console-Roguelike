@@ -71,6 +71,75 @@ namespace RogueLike.Maze
                     );
             }
 
+            List<List<Vector2Int>> suitablePoint = new List<List<Vector2Int>>()
+            {
+                new List<Vector2Int>(),
+                new List<Vector2Int>(),
+                new List<Vector2Int>(),
+                new List<Vector2Int>(),
+            };
+
+            for (int i = 0; i < mazeRenderPattern.ArraySize.x; i++)
+            {
+                if (dividedMazePart.DivisionAxes.y - 1 >= 0)
+                {
+                    if (mazeRenderPattern[i, dividedMazePart.DivisionAxes.y - 1] != _emptySymbol) continue;
+                }
+
+                if (dividedMazePart.DivisionAxes.y + 1 < mazeRenderPattern.ArraySize.y)
+                {
+                    if (mazeRenderPattern[i, dividedMazePart.DivisionAxes.y + 1] != _emptySymbol) continue;
+                }
+
+                if (i < dividedMazePart.DivisionAxes.x)
+                {
+                    suitablePoint[0].Add(new Vector2Int(i, dividedMazePart.DivisionAxes.y));
+                }
+                else
+                {
+                    suitablePoint[1].Add(new Vector2Int(i, dividedMazePart.DivisionAxes.y));
+                }
+            }
+
+            for (int i = 0; i < mazeRenderPattern.ArraySize.y; i++)
+            {
+                if (dividedMazePart.DivisionAxes.x - 1 >= 0)
+                {
+                    if (mazeRenderPattern[dividedMazePart.DivisionAxes.x - 1, i] != _emptySymbol) continue;
+                }
+
+                if (dividedMazePart.DivisionAxes.x + 1 < mazeRenderPattern.ArraySize.x)
+                {
+                    if (mazeRenderPattern[dividedMazePart.DivisionAxes.x + 1, i] != _emptySymbol) continue;
+                }
+
+                if (i < dividedMazePart.DivisionAxes.y)
+                {
+                    suitablePoint[2].Add(new Vector2Int(dividedMazePart.DivisionAxes.x, i));
+                }
+                else
+                {
+                    suitablePoint[3].Add(new Vector2Int(dividedMazePart.DivisionAxes.x, i));
+                }
+            }
+
+            Random random = seed == null ? new Random() : new Random(seed.Value);
+            int randomSide = random.Next(4);
+            for (int i = 0; i < 4; i++)
+            {
+                if (i == randomSide) continue;
+                if (suitablePoint[i].Count <= 0) continue;
+
+                var pointIndex = random.Next(0, suitablePoint[i].Count);
+                var point = suitablePoint[i][pointIndex];
+                mazeRenderPattern[point.x, point.y] = (byte)_emptySymbol;
+            }
+
+            // 0 - dividedMazePart.DivisionAxes.x   ;   dividedMazePart.DivisionAxes.y
+            // dividedMazePart.DivisionAxes.x - 100 ;   dividedMazePart.DivisionAxes.y
+            // dividedMazePart.DivisionAxes.x       ;   0 - dividedMazePart.DivisionAxes.y
+            // dividedMazePart.DivisionAxes.x       ;   dividedMazePart.DivisionAxes.y - 100
+
             return mazeRenderPattern;
         }
 
@@ -116,11 +185,6 @@ namespace RogueLike.Maze
             }
 
             return mazeFrameStringPattern;
-        }
-
-        private string[] GetFilledAxesPattern(int xAxis, int yAxis, Vector2Int mazeSize)
-        {
-            return GetFilledAxesPattern(new int[] { xAxis }, new int[] { yAxis }, mazeSize);
         }
 
         private string[] GetFilledAxesPattern(Vector2Int axes, Vector2Int mazeSize)
