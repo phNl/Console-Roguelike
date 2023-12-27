@@ -30,7 +30,7 @@
         /// <summary>
         /// Create empty collider as trigger
         /// </summary>
-        public Collider() : this(Collision.CollisionMap.GetEmpty(), true)
+        public Collider() : this(Collision.CollisionMap.Empty, true)
         {
         }
     }

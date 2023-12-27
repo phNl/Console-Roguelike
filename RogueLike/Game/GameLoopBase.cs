@@ -45,7 +45,6 @@
         }
 
         protected abstract void Update();
-        protected abstract void AfterUpdate();
 
         private void InnerUpdate(object? sender, System.Timers.ElapsedEventArgs e)
         {
@@ -53,7 +52,6 @@
             _lastUpdatingTime = e.SignalTime;
 
             Update();
-            AfterUpdate();
         }
     }
 }

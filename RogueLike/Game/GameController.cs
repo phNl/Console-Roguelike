@@ -6,6 +6,7 @@ using RogueLike.Input;
 using RogueLike.Maze;
 using RogueLike.Render;
 using RogueLike.RenderTools;
+using System.ComponentModel.DataAnnotations;
 
 namespace RogueLike.Game
 {
@@ -76,7 +77,6 @@ namespace RogueLike.Game
             InputHandler.OnKeyRead += OnInputUpdate;
 
             _gameLoop.OnUpdate += OnUpdate;
-            _gameLoop.OnAfterUpdate += OnAfterUpdate;
 
             _isInitialized = true;
         }
@@ -85,30 +85,28 @@ namespace RogueLike.Game
         {
             _currentLevel = level;
 
+            _gameLoop?.Pause();
             OnLoadLevel();
+            _gameLoop?.Unpause();
         }
 
         private static void OnLoadLevel()
         {
             MazeGenerator mazeGenerator = new MazeGenerator('#', (char)RenderBuffer.NullSymbol);
             RenderObject mazeRenderObject = new RenderObject(mazeGenerator.GetMazeRenderPattern(LevelSize, 5));
-            StaticObject maze = new StaticObject(mazeRenderObject);
-            Collider mazeCollider = new Collider(CollisionMap.GetCollisionMapFromRenderPattern(mazeRenderObject.RenderPattern, maze));
-            maze.Collider = mazeCollider;
+            Collider mazeCollider = new Collider(CollisionMap.GetCollisionMapFromRenderPattern(mazeRenderObject.RenderPattern));
+            StaticObject maze = new StaticObject(mazeRenderObject, mazeCollider);
             maze.Position = new Vector2Int(0, 0);
             CurrentLevel?.AddObject(maze);
 
 
             RenderBuffer playerRenderBuffer  = new RenderBuffer(new string[] { "O" });
             RenderObject playerRenderObject = new RenderObject(playerRenderBuffer);
-            Player player = new Player(playerRenderObject);
-            Collider playerCollider = new Collider(CollisionMap.GetCollisionMapFromRenderPattern(playerRenderBuffer, player));
-            player.Collider = playerCollider;
-
+            Collider playerCollider = new Collider(CollisionMap.GetCollisionMapFromRenderPattern(playerRenderBuffer));
+            Player player = new Player(playerRenderObject, playerCollider);
             player.Position = new Vector2Int(16, 5);
             Player = player;
-
-            //CurrentLevel?.AddObject(player);
+            CurrentLevel?.AddObject(player);
         }
 
         private static void OnInputUpdate(ConsoleKeyInfo keyInfo)
@@ -118,6 +116,12 @@ namespace RogueLike.Game
 
         private static void OnUpdate()
         {
+            Update();
+            AfterUpdate();
+        }
+
+        private static void Update()
+        {
             if (CurrentLevel?.Objects != null)
             {
                 for (var i = CurrentLevel.Objects.Count - 1; i > 0; i--)
@@ -125,10 +129,9 @@ namespace RogueLike.Game
                     CurrentLevel.Objects[i].Update();
                 }
             }
-
         }
 
-        private static void OnAfterUpdate()
+        private static void AfterUpdate()
         {
             RenderUpdate();
         }
@@ -142,7 +145,8 @@ namespace RogueLike.Game
 
             if (CurrentLevel != null)
             {
-                foreach (var gameObject in CurrentLevel.Objects)
+                var objects = new List<GameObject>(CurrentLevel.Objects);
+                foreach (var gameObject in objects)
                 {
                     if (gameObject != null)
                         _renderer.AddObject(gameObject);

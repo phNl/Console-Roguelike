@@ -29,7 +29,7 @@ namespace RogueLike.GameObjects.Characters
             RenderBuffer bulletRenderPattern = new RenderBuffer(new string[] { "*" });
             RenderObject bulletRenderObject = new RenderObject(bulletRenderPattern);
             Bullet bullet = new Bullet(bulletRenderObject, 100);
-            Collider bulletCollider = new Collider(CollisionMap.GetCollisionMapFromRenderPattern(bulletRenderPattern, bullet), true);
+            Collider bulletCollider = new Collider(CollisionMap.GetCollisionMapFromRenderPattern(bulletRenderPattern), true);
             bullet.Collider = bulletCollider;
 
             bullet.Position = Position + direction;

@@ -1,21 +1,22 @@
 ﻿using RogueLike.AdditionalTools;
 using RogueLike.CustomMath;
-using RogueLike.GameObjects;
 using RogueLike.Render;
 
 namespace RogueLike.Collision
 {
-    internal class CollisionMap : Array2DWrapper<List<GameObject>>, IReadOnlyCollisionMap
+    internal class CollisionMap : Array2DWrapper<bool>, IReadOnlyCollisionMap
     {
+        public static CollisionMap Empty => new CollisionMap(Vector2Int.Zero);
+
         public CollisionMap(Vector2Int arraySize) : base(arraySize)
         {
             for (int i = 0; i < Count; i++)
             {
-                Array[i] = new List<GameObject>();
+                Array[i] = false;
             }
         }
 
-        public static CollisionMap GetCollisionMapFromRenderPattern(RenderBuffer renderPattern, GameObject gameObject)
+        public static CollisionMap GetCollisionMapFromRenderPattern(IReadOnlyRenderBuffer renderPattern)
         {
             CollisionMap collisionMap = new CollisionMap(renderPattern.ArraySize);
 
@@ -23,24 +24,11 @@ namespace RogueLike.Collision
             {
                 for (int x = 0; x < renderPattern.ArraySize.x; x++)
                 {
-                    if (renderPattern[x, y] != RenderBuffer.NullSymbol)
-                    {
-                        collisionMap[x, y].Add(gameObject);
-                    }
+                    collisionMap[x, y] = (renderPattern[x, y] != RenderBuffer.NullSymbol);
                 }
             }
 
             return collisionMap;
-        }
-
-        public static CollisionMap GetCollisionMapFromRenderPattern(IReadOnlyRenderBuffer renderPattern, GameObject gameObject)
-        {
-            return GetCollisionMapFromRenderPattern(renderPattern, gameObject);
-        }
-
-        public static CollisionMap GetEmpty()
-        {
-            return new CollisionMap(Vector2Int.Zero);
         }
 
         public void InsertPattern(CollisionMap collisionMap, Vector2Int position)
@@ -56,10 +44,7 @@ namespace RogueLike.Collision
                     x < Math.Clamp(position.x + collisionMap.ArraySize.x, position.x, ArraySize.x);
                     x++)
                 {
-                    foreach (var item in collisionMap[x - position.x, y - position.y])
-                    {
-                        this[x, y].Add(item);
-                    }
+                    this[x, y] = collisionMap[x - position.x, y - position.y];
                 }
             }
         }

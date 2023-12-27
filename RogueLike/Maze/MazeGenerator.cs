@@ -42,13 +42,13 @@ namespace RogueLike.Maze
             RenderBuffer mazeRenderPattern = new RenderBuffer(mazeSize);
             mazeRenderPattern.InsertPattern(GetMazeFrameStringPattern(mazeSize), Vector2Int.Zero);
 
-            RenderBuffer innerMazeRenderPattern = GetMazeRenderPatternInner(mazeSize - new Vector2Int(2, 2), minCorridorWide, 0, seed);
+            RenderBuffer innerMazeRenderPattern = GetMazeRenderPatternInner(mazeSize - new Vector2Int(2, 2), minCorridorWide, seed);
             mazeRenderPattern.InsertPattern(innerMazeRenderPattern, new Vector2Int(1, 1));
             
             return mazeRenderPattern;
         }
 
-        private RenderBuffer GetMazeRenderPatternInner(Vector2Int mazeSize, int minCorridorWide, int recursiveCount, int? seed = null)
+        private RenderBuffer GetMazeRenderPatternInner(Vector2Int mazeSize, int minCorridorWide, int? seed = null)
         {
             RenderBuffer mazeRenderPattern = new RenderBuffer(mazeSize);
 
@@ -58,9 +58,6 @@ namespace RogueLike.Maze
 
             mazeRenderPattern.InsertPattern(dividedMazePart.MazePartStringPattern, Vector2Int.Zero);
 
-            if (recursiveCount > 100)
-                return mazeRenderPattern; // todo: REMOVE
-
             for (int i = 0; i < DivisionSectionsCount; i++)
             {
                 Vector2Int sectorPos = new Vector2Int(i / 2, i % 2);
@@ -69,7 +66,7 @@ namespace RogueLike.Maze
                 if (partSize.x <= 2 || partSize.y <= 2) continue;
 
                 mazeRenderPattern.InsertPattern(
-                    GetMazeRenderPatternInner(partSize, minCorridorWide, recursiveCount + 1, seed),
+                    GetMazeRenderPatternInner(partSize, minCorridorWide, seed),
                     dividedMazePart.DivisionAxes * sectorPos + sectorPos
                     );
             }

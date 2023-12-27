@@ -6,26 +6,6 @@ namespace RogueLike.Collision
 {
     internal static class CollisionHandler
     {
-        public static CollisionMap? GetGeneralCollisionMap(Level? level, Vector2Int levelSize)
-        {
-            if (level == null)
-                return null;
-
-            CollisionMap collisionMap = new CollisionMap(levelSize);
-
-            foreach (var gameObject in level.Objects)
-            {
-                collisionMap.InsertPattern(gameObject.Collider.CollisionMap, gameObject.Position);
-            }
-
-            return collisionMap;
-        }
-
-        public static CollisionMap? GetGeneralCollisionMap()
-        {
-            return GetGeneralCollisionMap(GameController.CurrentLevel, GameController.LevelSize);
-        }
-
         public static List<GameObject> GetCollisionObjectsAtPoint(Level? level, Vector2Int pointPosition)
         {
             List<GameObject> gameObjects = new List<GameObject>();
@@ -46,8 +26,7 @@ namespace RogueLike.Collision
                     continue;
                 }
 
-                if (!collider.IsTrigger
-                    && collider.CollisionMap[localPointPosition.x, localPointPosition.y].Count != 0)
+                if (!collider.IsTrigger && collider.CollisionMap[localPointPosition.x, localPointPosition.y])
                 {
                     gameObjects.Add(gameObject);
                 }
