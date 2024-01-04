@@ -9,7 +9,7 @@ namespace RogueLike.GameObjects.Projectiles
         private int _damage;
         public int Damage => _damage;
 
-        public Bullet(RenderObject renderObject, int damage) : base(renderObject)
+        public Bullet(RenderObject renderObject, Collider collider, int damage) : base(renderObject, collider)
         {
             _damage = damage;
         }
@@ -17,14 +17,15 @@ namespace RogueLike.GameObjects.Projectiles
         public override void Move(Vector2Int direction)
         {
             Position += direction;
+        }
 
-            List<GameObject> objectsAtPoint = CollisionHandler.GetCollisionObjectsAtPoint(Position);
-
-            objectsAtPoint.Remove(this);
+        protected void UpdateCollision()
+        {
+            List<GameObject> excludeGO = new List<GameObject>();
             if (Owner != null)
-                objectsAtPoint.Remove(Owner);
+                excludeGO.Add(Owner);
 
-            if (objectsAtPoint.Count > 0)
+            if (CollisionHandler.HasCollisionWithAny(this, CollisionMode.Only_Colliders, excludeGO))
             {
                 OnCollision();
             }
@@ -33,6 +34,16 @@ namespace RogueLike.GameObjects.Projectiles
         protected override void OnCollision()
         {
             Destroy();
+        }
+
+        protected override void OnLaunch()
+        {
+            UpdateCollision();
+        }
+
+        protected override void OnUpdate()
+        {
+            UpdateCollision();
         }
     }
 }

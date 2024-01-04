@@ -18,6 +18,12 @@ namespace RogueLike.AdditionalTools
             _array = new ArrayType[ArraySize.x * ArraySize.y];
         }
 
+        public Array2DWrapper(Array2DWrapper<ArrayType> array2DWrapper)
+        {
+            _arraySize = array2DWrapper.ArraySize;
+            _array = array2DWrapper.Array;
+        }
+
         public ArrayType this[int x, int y]
         {
             get

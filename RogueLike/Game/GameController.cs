@@ -6,14 +6,12 @@ using RogueLike.Input;
 using RogueLike.Maze;
 using RogueLike.Render;
 using RogueLike.RenderTools;
-using System.ComponentModel.DataAnnotations;
 
 namespace RogueLike.Game
 {
     internal enum GameState
     {
-        Menu,
-        InGame
+        InGame,
     }
 
     internal static class GameController
@@ -27,16 +25,16 @@ namespace RogueLike.Game
         private static Level? _currentLevel;
         public static Level? CurrentLevel => _currentLevel;
 
-        private static Player? _player;
+        private static Player? __player;
         public static Player? Player
         {
-            get => _player;
+            get => __player;
             set
             {
-                if (_player != value)
+                if (__player != value)
                 {
-                    OnPlayerChanged?.Invoke(_player, value);
-                    _player = value;
+                    OnPlayerChanged?.Invoke(__player, value);
+                    __player = value;
                 }
             }
         }
@@ -68,13 +66,10 @@ namespace RogueLike.Game
                 _inputActionMaps.Add(gameState, new InputActionMap());
             }
 
-            // TODO: временно 
             _inputActionHandler.CurrentInputActionMap = InputActionMaps?[GameState.InGame];
             OnPlayerChanged += UpdatePlayerBinds;
 
             InputHandler.RestartReadKeyLoop();
-
-            InputHandler.OnKeyRead += OnInputUpdate;
 
             _gameLoop.OnUpdate += OnUpdate;
 
@@ -85,9 +80,11 @@ namespace RogueLike.Game
         {
             _currentLevel = level;
 
+            _inputActionHandler?.Pause();
             _gameLoop?.Pause();
             OnLoadLevel();
             _gameLoop?.Unpause();
+            _inputActionHandler?.Unpause();
         }
 
         private static void OnLoadLevel()
@@ -96,9 +93,14 @@ namespace RogueLike.Game
             RenderObject mazeRenderObject = new RenderObject(mazeGenerator.GetMazeRenderPattern(LevelSize, 5));
             Collider mazeCollider = new Collider(CollisionMap.GetCollisionMapFromRenderPattern(mazeRenderObject.RenderPattern));
             StaticObject maze = new StaticObject(mazeRenderObject, mazeCollider);
-            maze.Position = new Vector2Int(0, 0);
-            CurrentLevel?.AddObject(maze);
+            maze.Position = Vector2Int.Zero;
+            CurrentLevel?.PrepareAddObject(maze);
 
+            RenderObject levelExitDoorRenderObject = new RenderObject(new RenderBuffer(new string[] { "E" }));
+            Collider levelExitDoorCollider = new Collider(CollisionMap.GetCollisionMapFromRenderPattern(levelExitDoorRenderObject.RenderPattern), true);
+            LevelExitDoor levelExitDoor = new LevelExitDoor(levelExitDoorRenderObject, levelExitDoorCollider);
+            levelExitDoor.Position = new Vector2Int(20, 20);
+            CurrentLevel?.PrepareAddObject(levelExitDoor);
 
             RenderBuffer playerRenderBuffer  = new RenderBuffer(new string[] { "O" });
             RenderObject playerRenderObject = new RenderObject(playerRenderBuffer);
@@ -106,33 +108,37 @@ namespace RogueLike.Game
             Player player = new Player(playerRenderObject, playerCollider);
             player.Position = new Vector2Int(16, 5);
             Player = player;
-            CurrentLevel?.AddObject(player);
-        }
-
-        private static void OnInputUpdate(ConsoleKeyInfo keyInfo)
-        {
-            
+            CurrentLevel?.PrepareAddObject(player);
         }
 
         private static void OnUpdate()
         {
+            PreUpdate();
             Update();
             AfterUpdate();
         }
 
+        private static void PreUpdate()
+        {
+            CurrentLevel?.AddPreparedObjects();
+        }
+
         private static void Update()
         {
+            _inputActionHandler?.ProcessInputActions();
+
             if (CurrentLevel?.Objects != null)
             {
-                for (var i = CurrentLevel.Objects.Count - 1; i > 0; i--)
+                foreach (var obj in CurrentLevel.Objects)
                 {
-                    CurrentLevel.Objects[i].Update();
+                    obj.Update();
                 }
             }
         }
 
         private static void AfterUpdate()
         {
+            CurrentLevel?.RemovePreparedObjects();
             RenderUpdate();
         }
 

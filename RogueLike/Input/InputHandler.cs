@@ -2,21 +2,21 @@
 {
     internal static class InputHandler
     {
-        public static event Action<ConsoleKeyInfo> OnKeyRead;
-        private static CancellationTokenSource _cts;
+        public static event Action<ConsoleKeyInfo>? OnKeyRead;
+        private static CancellationTokenSource? _cts;
 
-        public static void RestartReadKeyLoop()
+        public static async void RestartReadKeyLoop()
         {
             if (_cts != null)
                 StopReadKeyLoop();
 
             _cts = new CancellationTokenSource();
-            ReadKeyLoopAsync(_cts.Token);
+            await ReadKeyLoopAsync(_cts.Token);
         }
 
         public static void StopReadKeyLoop()
         {
-            _cts.Cancel();
+            _cts?.Cancel();
         }
 
         private static async Task ReadKeyLoopAsync(CancellationToken cancellationToken)

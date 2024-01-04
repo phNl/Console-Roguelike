@@ -135,11 +135,6 @@ namespace RogueLike.Maze
                 mazeRenderPattern[point.x, point.y] = (byte)_emptySymbol;
             }
 
-            // 0 - dividedMazePart.DivisionAxes.x   ;   dividedMazePart.DivisionAxes.y
-            // dividedMazePart.DivisionAxes.x - 100 ;   dividedMazePart.DivisionAxes.y
-            // dividedMazePart.DivisionAxes.x       ;   0 - dividedMazePart.DivisionAxes.y
-            // dividedMazePart.DivisionAxes.x       ;   dividedMazePart.DivisionAxes.y - 100
-
             return mazeRenderPattern;
         }
 

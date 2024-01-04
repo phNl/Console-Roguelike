@@ -133,5 +133,42 @@ namespace RogueLike.CustomMath
         {
             return Abs(this);
         }
+
+        public Vector2Int Clamp(int min, int max)
+        {
+            return new Vector2Int(
+                Math.Clamp(x, min, max),
+                Math.Clamp(y, min, max)
+            );
+        }
+
+        public Vector2Int Clamp(int min, Vector2Int max)
+        {
+            return new Vector2Int(
+                Math.Clamp(x, min, max.x),
+                Math.Clamp(y, min, max.y)
+            );
+        }
+
+        public Vector2Int Clamp(Vector2Int min, int max)
+        {
+            return new Vector2Int(
+                Math.Clamp(x, min.x, max),
+                Math.Clamp(y, min.y, max)
+            );
+        }
+
+        public Vector2Int Clamp(Vector2Int min, Vector2Int max)
+        {
+            return new Vector2Int(
+                Math.Clamp(x, min.x, max.x),
+                Math.Clamp(y, min.y, max.x)
+            );
+        }
+
+        public double Magnitude()
+        {
+            return Math.Sqrt(x * x + y * y);
+        }
     }
 }

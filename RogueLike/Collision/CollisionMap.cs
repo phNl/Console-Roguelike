@@ -31,7 +31,23 @@ namespace RogueLike.Collision
             return collisionMap;
         }
 
-        public void InsertPattern(CollisionMap collisionMap, Vector2Int position)
+        public void InsertPattern(IReadOnlyCollisionMap collisionMap, Vector2Int position)
+        {
+            ProcessPattern(collisionMap, position, (Vector2Int thisPointPos, Vector2Int otherPointPos) =>
+            {
+                this[thisPointPos.x, thisPointPos.y] = collisionMap[otherPointPos.x, otherPointPos.y];
+            });
+        }
+
+        public void ApplyMask(IReadOnlyCollisionMap collisionMap, Vector2Int position)
+        {
+            ProcessPattern(collisionMap, position, (Vector2Int thisPointPos, Vector2Int otherPointPos) =>
+            {
+                this[thisPointPos.x, thisPointPos.y] = collisionMap[otherPointPos.x, otherPointPos.y] && this[thisPointPos.x, thisPointPos.y];
+            });
+        }
+
+        private void ProcessPattern(IReadOnlyCollisionMap collisionMap, Vector2Int position, Action<Vector2Int, Vector2Int> process)
         {
             if (position.y >= ArraySize.y || position.x >= ArraySize.x)
                 return;
@@ -44,14 +60,9 @@ namespace RogueLike.Collision
                     x < Math.Clamp(position.x + collisionMap.ArraySize.x, position.x, ArraySize.x);
                     x++)
                 {
-                    this[x, y] = collisionMap[x - position.x, y - position.y];
+                    process.Invoke(new Vector2Int(x, y), new Vector2Int(x - position.x, y - position.y));
                 }
             }
-        }
-
-        public void InsertPattern(IReadOnlyCollisionMap collisionMap, Vector2Int position)
-        {
-            InsertPattern(collisionMap, position);
         }
     }
 }

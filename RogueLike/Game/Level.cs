@@ -7,6 +7,9 @@ namespace RogueLike.Game
         private List<GameObject> _objects;
         public IReadOnlyList<GameObject> Objects => _objects;
 
+        private List<GameObject> _objectsToRemove = new List<GameObject>();
+        private List<GameObject> _objectsToAdd = new List<GameObject>();
+
         public Level(List<GameObject> objects)
         {
             _objects = objects;
@@ -16,16 +19,36 @@ namespace RogueLike.Game
         {
         }
 
-        public void AddObject(GameObject obj)
+        public void PrepareAddObject(GameObject obj)
         {
-            _objects.Add(obj);
-            obj.OnDestroyAction += RemoveObject;
+            _objectsToAdd.Add(obj);
         }
 
-        public void RemoveObject(GameObject obj)
+        public void PrepareRemoveObject(GameObject obj)
         {
-            obj.OnDestroyAction -= RemoveObject;
-            _objects.Remove(obj);
+            _objectsToRemove.Add(obj);
+        }
+
+        public void RemovePreparedObjects()
+        {
+            foreach (GameObject obj in _objectsToRemove)
+            {
+                _objects.Remove(obj);
+                obj.OnDestroyAction -= PrepareRemoveObject;
+            }
+
+            _objectsToRemove = new List<GameObject>();
+        }
+
+        public void AddPreparedObjects()
+        {
+            foreach (GameObject obj in _objectsToAdd)
+            {
+                _objects.Add(obj);
+                obj.OnDestroyAction += PrepareRemoveObject;
+            }
+
+            _objectsToAdd = new List<GameObject>();
         }
     }
 }

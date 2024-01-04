@@ -8,7 +8,7 @@ namespace RogueLike.GameObjects.Characters
 {
     internal class Player : Character
     {
-        public Player()
+        public Player(RenderObject renderObject, Collider collider) : base(renderObject, collider)
         {
         }
 
@@ -20,20 +20,19 @@ namespace RogueLike.GameObjects.Characters
         {
         }
 
-        public Player(RenderObject renderObject, Collider collider) : base(renderObject, collider)
+        public Player()
         {
         }
 
         public void Shoot(Vector2Int direction)
         {
-            RenderBuffer bulletRenderPattern = new RenderBuffer(new string[] { "*" });
-            RenderObject bulletRenderObject = new RenderObject(bulletRenderPattern);
-            Bullet bullet = new Bullet(bulletRenderObject, 100);
-            Collider bulletCollider = new Collider(CollisionMap.GetCollisionMapFromRenderPattern(bulletRenderPattern), true);
+            RenderObject renderObject = new RenderObject(new RenderBuffer(new string[] { "*" }));
+            Collider bulletCollider = new Collider(CollisionMap.GetCollisionMapFromRenderPattern(renderObject.RenderPattern), true);
+            Bullet bullet = new Bullet(renderObject, bulletCollider, 100);
             bullet.Collider = bulletCollider;
 
             bullet.Position = Position + direction;
-            GameController.CurrentLevel?.AddObject(bullet);
+            GameController.CurrentLevel?.PrepareAddObject(bullet);
 
             bullet.Launch(direction, 5f, this, 5);
         }

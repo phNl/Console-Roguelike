@@ -37,7 +37,7 @@ namespace RogueLike.GameObjects.Projectiles
         private bool _isLaunched = false;
         public bool IsLaunched => _isLaunched;
 
-        private float _downTime = 0;
+        private float _stayTime = 0;
 
         private GameObject? _owner;
         public GameObject? Owner => _owner;
@@ -67,33 +67,43 @@ namespace RogueLike.GameObjects.Projectiles
             _maxLifetimeInSeconds = maxLifeTimeInSeconds;
             _owner = owner;
 
+            OnLaunch();
             _isLaunched = true;
         }
 
         public abstract void Move(Vector2Int direction);
 
-        public override void Update()
+        public override sealed void Update()
         {
-            if (GameController.GameLoop != null)
+            if (IsLaunched)
             {
-                float deltaTime = GameController.GameLoop.DeltaTime;
-                _downTime += deltaTime;
+                if (GameController.GameLoop != null)
+                {
+                    float deltaTime = GameController.GameLoop.DeltaTime;
+                    _stayTime += deltaTime;
 
-                if (!IsInfiniteLifetime)
-                    _lifetimeInSeconds += deltaTime;
-            }
+                    if (!IsInfiniteLifetime)
+                        _lifetimeInSeconds += deltaTime;
+                }
 
-            if (_downTime >= 1 / Speed)
-            {
-                _downTime = 0;
-                Move(Direction);
-            }
+                if (_stayTime >= 1 / Speed)
+                {
+                    _stayTime = 0;
+                    Move(Direction);
+                }
             
-            if (!IsInfiniteLifetime && LifetimeInSeconds > MaxLifetimeInSeconds)
-            {
-                OnLifetimeEnd();
-                Destroy();
+                if (!IsInfiniteLifetime && LifetimeInSeconds > MaxLifetimeInSeconds)
+                {
+                    OnLifetimeEnd();
+                    Destroy();
+                }
             }
+
+            OnUpdate();
+        }
+
+        protected virtual void OnLaunch()
+        {
         }
 
         protected virtual void OnCollision()
@@ -101,6 +111,10 @@ namespace RogueLike.GameObjects.Projectiles
         }
 
         protected virtual void OnLifetimeEnd()
+        {
+        }
+
+        protected virtual void OnUpdate()
         {
         }
     }

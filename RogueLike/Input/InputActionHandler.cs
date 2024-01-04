@@ -2,26 +2,55 @@
 {
     internal class InputActionHandler
     {
-        private InputActionMap? _currentInputActionMap;
+        private InputActionMap? __currentInputActionMap;
         public InputActionMap? CurrentInputActionMap
         {
-            get => _currentInputActionMap;
-            set => _currentInputActionMap = value;
+            get => __currentInputActionMap;
+            set => __currentInputActionMap = value;
         }
+
+        private Queue<Action> _inputActionsToProcess;
 
         public InputActionHandler()
         {
-            InputHandler.OnKeyRead += ActivateInputActions;
+            _inputActionsToProcess = new Queue<Action>();
         }
 
-        private void ActivateInputActions(ConsoleKeyInfo keyInfo)
+        public void Pause()
+        {
+            InputHandler.OnKeyRead -= EnqueueInputActions;
+        }
+
+        public void Unpause()
+        {
+            InputHandler.OnKeyRead += EnqueueInputActions;
+        }
+
+        public void ProcessInputActions()
+        {
+            while (_inputActionsToProcess.Count > 0)
+            {
+                Action action = _inputActionsToProcess.Dequeue();
+                action?.Invoke();
+            }
+        }
+
+        public void ClearInputActionsQueue()
+        {
+            _inputActionsToProcess?.Clear();
+        }
+
+        private void EnqueueInputActions(ConsoleKeyInfo keyInfo)
         {
             if (CurrentInputActionMap == null)
                 return;
 
-            foreach (var inputAction in CurrentInputActionMap.ActionBinds[keyInfo.Key])
+            Action[] inputActions = new Action[CurrentInputActionMap.ActionBinds.Count];
+            CurrentInputActionMap.ActionBinds[keyInfo.Key].CopyTo(inputActions);
+
+            foreach (var inputAction in inputActions)
             {
-                inputAction?.Invoke();
+                _inputActionsToProcess.Enqueue(inputAction);
             }
         }
     }

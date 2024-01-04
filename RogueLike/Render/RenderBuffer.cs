@@ -83,11 +83,6 @@ namespace RogueLike.Render
             InsertPattern(position, (y) => pattern.ArraySize.x, pattern.ArraySize.y, (xy) => pattern[xy.x, xy.y]);
         }
 
-        public void InsertPattern(RenderBuffer pattern, Vector2Int position)
-        {
-            InsertPattern(position, (y) => pattern.ArraySize.x, pattern.ArraySize.y, (xy) => pattern[xy.x, xy.y]);
-        }
-
         public void InsertPattern(RenderBuffer pattern)
         {
             InsertPattern(pattern, Vector2Int.Zero);

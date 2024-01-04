@@ -4,9 +4,14 @@ using RogueLike.Render;
 
 namespace RogueLike.GameObjects.Characters
 {
-    internal class Character : GameObject, IMovable
+    internal abstract class Character : GameObject, IMovable
     {
-        public Character()
+        /// <summary>
+        /// Invoke when the character moves in a direction
+        /// </summary>
+        public event Action<Vector2Int>? OnMove;
+
+        public Character(RenderObject renderObject, Collider collider) : base(renderObject, collider)
         {
         }
 
@@ -18,14 +23,22 @@ namespace RogueLike.GameObjects.Characters
         {
         }
 
-        public Character(RenderObject renderObject, Collider collider) : base(renderObject, collider)
+        public Character()
         {
         }
 
         public void Move(Vector2Int direction)
         {
-            if (CollisionHandler.GetCollisionObjectsAtPoint(Position + direction).Count == 0)
-                Position += direction;
+            Position += direction;
+
+            if (CollisionHandler.HasCollisionWithAny(this, CollisionMode.Only_Colliders))
+            {
+                Position -= direction;
+            }
+            else
+            {
+                OnMove?.Invoke(direction);
+            }
         }
 
         public void MoveUp()

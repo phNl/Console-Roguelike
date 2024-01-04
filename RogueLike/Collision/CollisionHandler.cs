@@ -4,9 +4,16 @@ using RogueLike.GameObjects;
 
 namespace RogueLike.Collision
 {
+    internal enum CollisionMode
+    {
+        All,
+        Only_Colliders,
+        Only_Triggers,
+    }
+
     internal static class CollisionHandler
     {
-        public static List<GameObject> GetCollisionObjectsAtPoint(Level? level, Vector2Int pointPosition)
+        public static List<GameObject> GetCollisionObjectsAtPoint(Level? level, Vector2Int position, CollisionMode collisionMode = CollisionMode.All)
         {
             List<GameObject> gameObjects = new List<GameObject>();
 
@@ -17,16 +24,16 @@ namespace RogueLike.Collision
             {
                 var collider = gameObject.Collider;
 
-                Vector2Int localPointPosition = pointPosition - gameObject.Position;
+                Vector2Int localPosition = position - gameObject.Position;
                 Vector2Int patternSize = collider.CollisionMap.ArraySize;
 
-                if (localPointPosition.x < 0 || localPointPosition.x >= patternSize.x ||
-                    localPointPosition.y < 0 || localPointPosition.y >= patternSize.y)
+                if (localPosition.x < 0 || localPosition.x >= patternSize.x ||
+                    localPosition.y < 0 || localPosition.y >= patternSize.y)
                 {
                     continue;
                 }
 
-                if (!collider.IsTrigger && collider.CollisionMap[localPointPosition.x, localPointPosition.y])
+                if (IsSuitableCollider(collisionMode, collider) && collider.CollisionMap[localPosition.x, localPosition.y])
                 {
                     gameObjects.Add(gameObject);
                 }
@@ -35,9 +42,130 @@ namespace RogueLike.Collision
             return gameObjects;
         }
 
-        public static List<GameObject> GetCollisionObjectsAtPoint(Vector2Int pointPosition)
+        public static List<GameObject> GetCollisionObjectsAtPoint(Vector2Int pointPosition, CollisionMode collisionMode = CollisionMode.All)
         {
-            return GetCollisionObjectsAtPoint(GameController.CurrentLevel, pointPosition);
+            return GetCollisionObjectsAtPoint(GameController.CurrentLevel, pointPosition, collisionMode);
+        }
+
+        public static bool IsGameObjectsCollidersIntersects(GameObject firstGameObject, GameObject secondGameObject)
+        {
+            Vector2Int firstGOPos1 = firstGameObject.Position;
+            Vector2Int firstGOPos2 = firstGameObject.Position + firstGameObject.Collider.CollisionMap.ArraySize;
+
+            Vector2Int secondGOPos1 = secondGameObject.Position;
+            Vector2Int secondGOPos2 = secondGameObject.Position + secondGameObject.Collider.CollisionMap.ArraySize;
+
+            return (firstGOPos1.x < secondGOPos2.x && firstGOPos2.x > secondGOPos1.x &&
+                firstGOPos1.y < secondGOPos2.y && firstGOPos2.y > secondGOPos1.y);
+        }
+
+        /// <summary>
+        /// Get collision points on level between two objects
+        /// </summary>
+        public static List<Vector2Int> GetCollisionPointsBetweenObjects(GameObject firstGameObject, GameObject secondGameObject, bool onlyFirstPoint = true)
+        {
+            List<Vector2Int> points = new List<Vector2Int>();
+
+            if (!IsGameObjectsCollidersIntersects(firstGameObject, secondGameObject))
+            {
+                return points;
+            }
+
+            double firstGOSize = firstGameObject.Collider.CollisionMap.ArraySize.Magnitude();
+            double secongGOSize = secondGameObject.Collider.CollisionMap.ArraySize.Magnitude();
+
+            GameObject smallGO = firstGOSize < secongGOSize ? firstGameObject : secondGameObject;
+            GameObject bigGO = smallGO != firstGameObject ? firstGameObject : secondGameObject;
+
+            Vector2Int localBigGOPosition = bigGO.Position - smallGO.Position;
+
+            CollisionMap comparsionCollisionMap = new CollisionMap(smallGO.Collider.CollisionMap.ArraySize);
+            comparsionCollisionMap.InsertPattern(smallGO.Collider.CollisionMap, Vector2Int.Zero);
+            comparsionCollisionMap.ApplyMask(bigGO.Collider.CollisionMap, localBigGOPosition);
+
+            Vector2Int bigGOEndPosition = localBigGOPosition + bigGO.Collider.CollisionMap.ArraySize;
+
+            for (int x = 0; x < bigGOEndPosition.x && x < comparsionCollisionMap.ArraySize.x; x++)
+            {
+                for (int y = 0; y < bigGOEndPosition.y && y < comparsionCollisionMap.ArraySize.y; y++)
+                {
+                    if (comparsionCollisionMap[x, y])
+                    {
+                        points.Add(new Vector2Int(x, y));
+                        if (onlyFirstPoint)
+                            return points;
+                    }
+                }
+            }
+
+            return points;
+        }
+
+        public static Dictionary<GameObject, List<Vector2Int>> GetCollisionObjects(Level? level, GameObject gameObject, CollisionMode collisionMode = CollisionMode.All)
+        {
+            var objectsWithPoints = new Dictionary<GameObject, List<Vector2Int>>();
+
+            if (level == null)
+                return objectsWithPoints;
+    
+            foreach (var obj in level.Objects)
+            {
+                if (IsSuitableCollider(collisionMode, obj.Collider))
+                    objectsWithPoints.Add(obj, GetCollisionPointsBetweenObjects(gameObject, obj));
+            }
+
+            return objectsWithPoints;
+        }
+
+        public static Dictionary<GameObject, List<Vector2Int>> GetCollisionObjects(GameObject gameObject, CollisionMode collisionMode = CollisionMode.All)
+        {
+            return GetCollisionObjects(GameController.CurrentLevel, gameObject);
+        }
+
+
+        public static bool HasCollisionWithAny(Level? level, GameObject gameObject, CollisionMode collisionMode = CollisionMode.All, List<GameObject>? excludeGameObjects = null)
+        {
+            if (level == null)
+                return false;
+
+            foreach (var obj in level.Objects)
+            {
+                if (obj == gameObject)
+                    continue;
+
+                if (excludeGameObjects != null && excludeGameObjects.Contains(obj))
+                    continue;
+
+                if (!IsSuitableCollider(collisionMode, obj.Collider))
+                    continue;
+
+                if (GetCollisionPointsBetweenObjects(gameObject, obj).Count > 0)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public static bool HasCollisionWithAny(GameObject gameObject, CollisionMode collisionMode = CollisionMode.All, List<GameObject>? excludeGameObjects = null)
+        {
+            return HasCollisionWithAny(GameController.CurrentLevel, gameObject, collisionMode, excludeGameObjects);
+        }
+
+        private static bool IsSuitableCollider(CollisionMode collisionMode, Collider collider)
+        {
+            switch (collisionMode)
+            {
+                case CollisionMode.All:
+                    return true;
+                case CollisionMode.Only_Colliders:
+                    return !collider.IsTrigger;
+                case CollisionMode.Only_Triggers:
+                    return collider.IsTrigger;
+            }
+
+            throw new NotImplementedException();
         }
     }
 }
