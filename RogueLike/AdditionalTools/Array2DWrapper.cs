@@ -1,13 +1,15 @@
 ﻿using RogueLike.CustomMath;
+using System.Collections;
+using System.Drawing;
 
 namespace RogueLike.AdditionalTools
 {
-    internal abstract class Array2DWrapper<ArrayType> : IReadOnlyArray2DWrapper<ArrayType>
+    internal abstract class Array2DWrapper<ArrayType> : IReadOnlyArray2DWrapper<ArrayType>, IEnumerable<ArrayType>
     {
         private ArrayType[] _array;
         protected ArrayType[] Array => _array;
 
-        private Vector2Int _arraySize;
+        private readonly Vector2Int _arraySize;
         public Vector2Int ArraySize => _arraySize;
 
         public int Count => _array.Length;
@@ -28,13 +30,33 @@ namespace RogueLike.AdditionalTools
         {
             get
             {
-                CheckIfOutOfBounds(new Vector2Int(x, y));
-                return Array[x + y * ArraySize.x];
+                return this[new Vector2Int(x, y)];
             }
             set
             {
-                CheckIfOutOfBounds(new Vector2Int(x, y));
-                Array[x + y * ArraySize.x] = value;
+                this[new Vector2Int(x, y)] = value;
+            }
+        }
+
+        public ArrayType this[Vector2Int point]
+        {
+            get
+            {
+                if (!IsPointInBounds(point))
+                {
+                    ThrowOutOfBoundsException(point);
+                }
+
+                return Array[point.x + point.y * ArraySize.x];
+            }
+            set
+            {
+                if (!IsPointInBounds(point))
+                {
+                    ThrowOutOfBoundsException(point);
+                }
+
+                _array[point.x + point.y * ArraySize.x] = value;
             }
         }
 
@@ -50,18 +72,26 @@ namespace RogueLike.AdditionalTools
             return array;
         }
 
-        private bool CheckIfOutOfBounds(Vector2Int coord)
+        public IEnumerator<ArrayType> GetEnumerator()
         {
-            if (coord.x >= ArraySize.x || coord.y >= ArraySize.y || coord.x < 0 || coord.y < 0)
-            {
-                throw new Exception($"Out of bounds in {this} " +
-                    $"(indexes: x = {coord.x}, y = {coord.y}) " +
-                    $"(arraySize: sizeX = {ArraySize.x}, sizeY = {ArraySize.y})");
-            }
-            else
-            {
-                return false;
-            }
+            return ((IEnumerable<ArrayType>)Array).GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return Array.GetEnumerator();
+        }
+
+        public bool IsPointInBounds(Vector2Int point)
+        {
+            return point.InRectangle(Vector2Int.Zero, ArraySize - 1);
+        }
+
+        private void ThrowOutOfBoundsException(Vector2Int point)
+        {
+            throw new Exception(
+                $"Out of bounds in {this} (indexes: x = {point.x}, y = {point.y}) (arraySize: sizeX = {ArraySize.x}, sizeY = {ArraySize.y})"
+            );
         }
     }
 }

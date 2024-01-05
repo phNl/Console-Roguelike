@@ -35,7 +35,7 @@ namespace RogueLike.Weapons
 
         public abstract int Damage { get; }
 
-        public abstract bool CanAttack { get; }
+        public virtual bool CanAttack => TimerBeforeAttack <= 0f;
 
         public Weapon(double attackCooldown)
         {
@@ -46,7 +46,7 @@ namespace RogueLike.Weapons
 
         public void Attack(Vector2Int position, Vector2Int direction, GameObject attacker)
         {
-            if (TimerBeforeAttack <= 0f && CanAttack)
+            if (CanAttack)
             {
                 HandleAttack(position, direction, attacker);
 

@@ -1,4 +1,5 @@
 ﻿using RogueLike.CustomMath;
+using System.Text;
 
 namespace RogueLike.Render
 {

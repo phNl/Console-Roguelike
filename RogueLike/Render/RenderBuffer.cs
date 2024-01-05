@@ -1,11 +1,13 @@
 ﻿using RogueLike.AdditionalTools;
 using RogueLike.CustomMath;
+using System.Text;
 
 namespace RogueLike.Render
 {
     internal class RenderBuffer : Array2DWrapper<byte>, IReadOnlyRenderBuffer
     {
         public static byte NullSymbol => 0;
+        public static Encoding RenderBufferEncoding => Encoding.Unicode;
 
         public RenderBuffer(Vector2Int bufferSize) : base(bufferSize)
         {
@@ -24,9 +26,19 @@ namespace RogueLike.Render
             InsertPattern(stringPattern, nullSymbolReplacer, Vector2Int.Zero);
         }
 
+        public static byte GetByteFromChar(char symbol)
+        {
+            return RenderBufferEncoding.GetBytes($"{symbol}")[0];
+        }
+
+        public static char GetCharFromByte(byte number)
+        {
+            return RenderBufferEncoding.GetString(new byte[1] { number })[0];
+        }
+
         public void FillWith(char symbol)
         {
-            FillWith((byte)symbol);
+            FillWith(GetByteFromChar(symbol));
         }
 
         public static int GetMaxStringSize(string[] stringArray)
@@ -49,7 +61,7 @@ namespace RogueLike.Render
             {
                 for (int x = 0; x < ArraySize.x; x++)
                 {
-                    str += (char)this[x, y];
+                    str += GetCharFromByte(this[x, y]);
                 }
 
                 str += "\n";
@@ -60,17 +72,17 @@ namespace RogueLike.Render
 
         public void InsertPattern(string[] stringPattern, Vector2Int position)
         {
-            InsertPattern(position, (y) => stringPattern[y].Length, stringPattern.Length, (xy) => (byte)stringPattern[xy.y][xy.x]);
+            InsertPattern(position, (y) => stringPattern[y].Length, stringPattern.Length, (xy) => GetByteFromChar(stringPattern[xy.y][xy.x]));
         }
 
         public void InsertPattern(string[] stringPattern, char nullSymbolReplacer, Vector2Int position)
         {
             for (int i = 0; i < stringPattern.Length; i++)
             {
-                stringPattern[i] = stringPattern[i].Replace(nullSymbolReplacer, (char)NullSymbol);
+                stringPattern[i] = stringPattern[i].Replace(nullSymbolReplacer, GetCharFromByte(NullSymbol));
             }
 
-            InsertPattern(position, (y) => stringPattern[y].Length, stringPattern.Length, (xy) => (byte)stringPattern[xy.y][xy.x]);
+            InsertPattern(position, (y) => stringPattern[y].Length, stringPattern.Length, (xy) => GetByteFromChar(stringPattern[xy.y][xy.x]));
         }
 
         public void InsertPattern(byte[][] bytePattern, Vector2Int position)
@@ -80,7 +92,7 @@ namespace RogueLike.Render
 
         public void InsertPattern(IReadOnlyRenderBuffer pattern, Vector2Int position)
         {
-            InsertPattern(position, (y) => pattern.ArraySize.x, pattern.ArraySize.y, (xy) => pattern[xy.x, xy.y]);
+            InsertPattern(position, (y) => pattern.ArraySize.x, pattern.ArraySize.y, (xy) => pattern[xy]);
         }
 
         public void InsertPattern(RenderBuffer pattern)

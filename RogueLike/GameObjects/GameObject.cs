@@ -34,18 +34,6 @@ namespace RogueLike.GameObjects
             _collider = collider;
         }
 
-        public GameObject(RenderObject renderObject) : this(renderObject, new Collider())
-        {
-        }
-
-        public GameObject(Collider collider) : this(new RenderObject(), collider)
-        {
-        }
-
-        public GameObject() : this(new RenderObject(), new Collider())
-        {
-        }
-
         public virtual void Update(double deltaTime)
         {
         }

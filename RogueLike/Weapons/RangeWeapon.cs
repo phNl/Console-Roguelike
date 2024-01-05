@@ -18,8 +18,6 @@ namespace RogueLike.Weapons
         private int _damage;
         public override sealed int Damage => _damage;
 
-        public override bool CanAttack => true;
-
         public RangeWeapon(double attackCooldown, float bulletSpeed, float bulletLifeTime, int damage) : base(attackCooldown) 
         {
             _bulletLifeTime = bulletLifeTime;
@@ -37,7 +35,7 @@ namespace RogueLike.Weapons
             bullet.Position = position + direction;
             GameController.CurrentLevel?.PrepareAddObject(bullet);
 
-            bullet.Launch(direction, 5f, attacker, 5);
+            bullet.Launch(direction, _bulletSpeed, attacker, _bulletLifeTime);
         }
     }
 }

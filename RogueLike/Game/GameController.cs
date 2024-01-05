@@ -41,6 +41,9 @@ namespace RogueLike.Game
             }
         }
 
+        private static StaticObject? _maze;
+        public static StaticObject? Maze => _maze;
+
         private static InputActionHandler? _inputActionHandler;
         private static Renderer? _renderer;
 
@@ -91,9 +94,12 @@ namespace RogueLike.Game
                 _bindingHandlers?.Add(new InGamePlayerBindingHandler(InputActionMaps[GameState.InGame]));
             }
 
-            foreach (var bindingHandler in _bindingHandlers)
+            if (_bindingHandlers != null)
             {
-                bindingHandler.AddAllBinds();
+                foreach (var bindingHandler in _bindingHandlers)
+                {
+                    bindingHandler.AddAllBinds();
+                }
             }
         }
 
@@ -113,9 +119,9 @@ namespace RogueLike.Game
             // Maze walls
             MazeGenerator mazeGenerator = new MazeGenerator('#', (char)RenderBuffer.NullSymbol);
             RenderObject mazeRenderObject = new RenderObject(mazeGenerator.GetMazeRenderPattern(LevelSize, 7));
-            StaticObject maze = new StaticObject(mazeRenderObject, new Collider(mazeRenderObject));
-            maze.Position = Vector2Int.Zero;
-            CurrentLevel?.PrepareAddObject(maze);
+            _maze = new StaticObject(mazeRenderObject, new Collider(mazeRenderObject));
+            _maze.Position = Vector2Int.Zero;
+            CurrentLevel?.PrepareAddObject(_maze);
 
             // Level exit trigger
             RenderObject levelExitDoorRenderObject = new RenderObject(new RenderBuffer(new string[] { "E" }));
@@ -130,6 +136,12 @@ namespace RogueLike.Game
             player.Position = new Vector2Int(16, 5);
             Player = player;
             CurrentLevel?.PrepareAddObject(player);
+
+            // Test Enemy
+            RenderObject enemyRenderObject = new RenderObject(new RenderBuffer(new string[] { "X" }));
+            Enemy enemy = new Enemy(enemyRenderObject, new Collider(enemyRenderObject));
+            enemy.Position = new Vector2Int(25, 10);
+            CurrentLevel?.PrepareAddObject(enemy);
         }
 
         private static void OnUpdate()

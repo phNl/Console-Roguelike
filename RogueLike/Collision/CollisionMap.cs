@@ -6,7 +6,7 @@ namespace RogueLike.Collision
 {
     internal class CollisionMap : Array2DWrapper<bool>, IReadOnlyCollisionMap
     {
-        public static CollisionMap Empty => new CollisionMap(Vector2Int.Zero);
+        public static CollisionMap Empty => new(Vector2Int.Zero);
 
         public CollisionMap(Vector2Int arraySize) : base(arraySize)
         {
@@ -35,7 +35,7 @@ namespace RogueLike.Collision
         {
             ProcessPattern(collisionMap, position, (Vector2Int thisPointPos, Vector2Int otherPointPos) =>
             {
-                this[thisPointPos.x, thisPointPos.y] = collisionMap[otherPointPos.x, otherPointPos.y];
+                this[thisPointPos] = collisionMap[otherPointPos];
             });
         }
 
@@ -43,7 +43,7 @@ namespace RogueLike.Collision
         {
             ProcessPattern(collisionMap, position, (Vector2Int thisPointPos, Vector2Int otherPointPos) =>
             {
-                this[thisPointPos.x, thisPointPos.y] = collisionMap[otherPointPos.x, otherPointPos.y] && this[thisPointPos.x, thisPointPos.y];
+                this[thisPointPos] = collisionMap[otherPointPos] && this[thisPointPos];
             });
         }
 

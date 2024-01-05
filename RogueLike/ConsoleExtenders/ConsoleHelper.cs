@@ -39,7 +39,7 @@ namespace RogueLike.ConsoleExtenders
         {
             Console.WriteLine("Set Current Font: " + font);
 
-            FontInfo before = new FontInfo
+            FontInfo before = new()
             {
                 cbSize = Marshal.SizeOf<FontInfo>()
             };
@@ -47,7 +47,7 @@ namespace RogueLike.ConsoleExtenders
             if (GetCurrentConsoleFontEx(ConsoleOutputHandle, false, ref before))
             {
 
-                FontInfo set = new FontInfo
+                FontInfo set = new()
                 {
                     cbSize = Marshal.SizeOf<FontInfo>(),
                     FontIndex = 0,
@@ -65,7 +65,7 @@ namespace RogueLike.ConsoleExtenders
                     throw new System.ComponentModel.Win32Exception(ex);
                 }
 
-                FontInfo after = new FontInfo
+                FontInfo after = new()
                 {
                     cbSize = Marshal.SizeOf<FontInfo>()
                 };

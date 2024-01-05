@@ -1,11 +1,8 @@
-﻿using System.Drawing;
-using System.Numerics;
-using System.Runtime.CompilerServices;
-using System.Security.Cryptography.X509Certificates;
-
-namespace RogueLike.CustomMath
+﻿namespace RogueLike.CustomMath
 {
-    internal struct Vector2Int
+    internal struct Vector2Int :
+        IEquatable<Vector2Int>,
+        IComparable<Vector2Int>
     {
         public int x;
         public int y;
@@ -28,6 +25,34 @@ namespace RogueLike.CustomMath
 
         public Vector2Int() : this(0, 0)
         {
+        }
+
+        public override string ToString()
+        {
+            return $"({x}, {y})";
+        }
+
+        public override bool Equals(object? obj)
+        {
+            if ((obj == null) || !GetType().Equals(obj.GetType()))
+            {
+                return false;
+            }
+            else
+            {
+                Vector2Int other = (Vector2Int)obj;
+                return this == other;
+            }
+        }
+
+        public bool Equals(Vector2Int other)
+        {
+            return this == other;
+        }
+
+        public override int GetHashCode()
+        {
+            throw new NotImplementedException();
         }
 
         public static implicit operator Vector2Int(Vector2Float vector2Float)
@@ -106,21 +131,32 @@ namespace RogueLike.CustomMath
             return new Vector2Int(left.x / right, left.y / right);
         }
 
-        public override bool Equals(object? obj)
+        public static bool operator <=(Vector2Int left, Vector2Int right)
         {
-            if ((obj == null) || !GetType().Equals(obj.GetType()))
-            {
-                return false;
-            }
-            else
-            {
-                Vector2Int other = (Vector2Int)obj;
-                return this == other;
-            }
+            return left.x <= right.x && left.y <= right.y;
         }
 
-        public override int GetHashCode()
+        public static bool operator <(Vector2Int left, Vector2Int right)
         {
+            return left.x < right.x && left.y < right.y;
+        }
+
+        public static bool operator >=(Vector2Int left, Vector2Int right)
+        {
+            return !(left < right);
+        }
+
+        public static bool operator >(Vector2Int left, Vector2Int right)
+        {
+            return !(left <= right);
+        }
+
+        public int CompareTo(Vector2Int other)
+        {
+            if (this == other) return 0;
+            if (this <= other) return -1;
+            if (this >= other) return 1;
+
             throw new NotImplementedException();
         }
 
@@ -169,6 +205,30 @@ namespace RogueLike.CustomMath
         public double Magnitude()
         {
             return Math.Sqrt(x * x + y * y);
+        }
+
+        public bool InRectangle(Vector2Int minPoint, Vector2Int maxPoint)
+        {
+            if (minPoint >= maxPoint && minPoint != maxPoint)
+                throw new Exception("FirstPoint cannot be greater than SecondPoint");
+
+            return x >= minPoint.x && x <= maxPoint.x && y >= minPoint.y && y <= maxPoint.y;
+        }
+
+        public List<Vector2Int> GetNeighborsPositions(Vector2Int center)
+        {
+            return new List<Vector2Int>()
+            {
+                center + Up,
+                center + Down,
+                center + Left,
+                center + Right,
+            };
+        }
+
+        public List<Vector2Int> GetNeighborsPositions()
+        {
+            return GetNeighborsPositions(this);
         }
     }
 }

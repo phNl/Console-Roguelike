@@ -132,7 +132,7 @@ namespace RogueLike.Maze
 
                 var pointIndex = random.Next(0, suitablePoint[i].Count);
                 var point = suitablePoint[i][pointIndex];
-                mazeRenderPattern[point.x, point.y] = (byte)_emptySymbol;
+                mazeRenderPattern[point] = (byte)_emptySymbol;
             }
 
             return mazeRenderPattern;

@@ -17,6 +17,7 @@ namespace RogueLike.GameObjects.Projectiles
         public override void Move(Vector2Int direction)
         {
             Position += direction;
+            UpdateCollision();
         }
 
         protected void UpdateCollision()

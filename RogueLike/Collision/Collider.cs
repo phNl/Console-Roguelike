@@ -4,10 +4,10 @@ namespace RogueLike.Collision
 {
     internal struct Collider
     {
-        private CollisionMap _collisionMap;
+        private readonly CollisionMap _collisionMap;
         public IReadOnlyCollisionMap CollisionMap => _collisionMap;
 
-        private bool _isTrigger;
+        private readonly bool _isTrigger;
         public bool IsTrigger => _isTrigger;
 
         /// <summary>

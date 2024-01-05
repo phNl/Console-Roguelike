@@ -38,23 +38,12 @@ namespace RogueLike.GameObjects.Projectiles
         public bool IsLaunched => _isLaunched;
 
         private double _stayTime = 0;
+        public double MaxStayTime => 1 / Speed;
 
         private GameObject? _owner;
         public GameObject? Owner => _owner;
 
         protected Projectile(RenderObject renderObject, Collider collider) : base(renderObject, collider)
-        {
-        }
-
-        protected Projectile(RenderObject renderObject) : base(renderObject)
-        {
-        }
-
-        protected Projectile(Collider collider) : base(collider)
-        {
-        }
-
-        protected Projectile()
         {
         }
 
@@ -85,9 +74,9 @@ namespace RogueLike.GameObjects.Projectiles
                         _lifetimeInSeconds += deltaTime;
                 }
 
-                if (_stayTime >= 1 / Speed)
+                while (_stayTime >= MaxStayTime)
                 {
-                    _stayTime = 0;
+                    _stayTime -= MaxStayTime;
                     Move(Direction);
                 }
             

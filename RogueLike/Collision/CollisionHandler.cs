@@ -33,7 +33,7 @@ namespace RogueLike.Collision
                     continue;
                 }
 
-                if (IsSuitableCollider(collisionMode, collider) && collider.CollisionMap[localPosition.x, localPosition.y])
+                if (IsSuitableCollider(collisionMode, collider) && collider.CollisionMap[localPosition])
                 {
                     gameObjects.Add(gameObject);
                 }
