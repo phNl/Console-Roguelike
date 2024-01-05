@@ -15,8 +15,8 @@
 
         private DateTime _lastUpdatingTime;
 
-        private float _deltaTime = 0;
-        public float DeltaTime => _deltaTime;
+        private double _deltaTime = 0;
+        public double DeltaTime => _deltaTime;
 
         public GameLoopBase(ushort fpsMax)
         {
@@ -48,7 +48,8 @@
 
         private void InnerUpdate(object? sender, System.Timers.ElapsedEventArgs e)
         {
-            _deltaTime = (float)(e.SignalTime - _lastUpdatingTime).Ticks / TicksPerSecond;
+            //_deltaTime = (float)(e.SignalTime - _lastUpdatingTime).Ticks / TicksPerSecond;
+            _deltaTime = (e.SignalTime - _lastUpdatingTime).TotalSeconds;
             _lastUpdatingTime = e.SignalTime;
 
             Update();

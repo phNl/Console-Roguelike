@@ -1,13 +1,14 @@
 ﻿using RogueLike.Collision;
 using RogueLike.CustomMath;
-using RogueLike.Game;
-using RogueLike.GameObjects.Projectiles;
 using RogueLike.Render;
+using RogueLike.Weapons;
 
 namespace RogueLike.GameObjects.Characters
 {
     internal class Player : Character
     {
+        private Weapon _weapon = new RangeWeapon(1f, 5f, 5f, 100);
+
         public Player(RenderObject renderObject, Collider collider) : base(renderObject, collider)
         {
         }
@@ -24,37 +25,36 @@ namespace RogueLike.GameObjects.Characters
         {
         }
 
-        public void Shoot(Vector2Int direction)
+        // todo: Remove this  
+        public void Attack(Vector2Int direction)
         {
-            RenderObject renderObject = new RenderObject(new RenderBuffer(new string[] { "*" }));
-            Collider bulletCollider = new Collider(CollisionMap.GetCollisionMapFromRenderPattern(renderObject.RenderPattern), true);
-            Bullet bullet = new Bullet(renderObject, bulletCollider, 100);
-            bullet.Collider = bulletCollider;
-
-            bullet.Position = Position + direction;
-            GameController.CurrentLevel?.PrepareAddObject(bullet);
-
-            bullet.Launch(direction, 5f, this, 5);
+            _weapon.Attack(Position, direction, this);
         }
 
-        public void ShootUp()
+        public void AttackUp()
         {
-            Shoot(Vector2Int.Up);
+            Attack(Vector2Int.Up);
         }
 
-        public void ShootDown()
+        public void AttackDown()
         {
-            Shoot(Vector2Int.Down);
+            Attack(Vector2Int.Down);
         }
 
-        public void ShootLeft()
+        public void AttackLeft()
         {
-            Shoot(Vector2Int.Left);
+            Attack(Vector2Int.Left);
         }
 
-        public void ShootRight()
+        public void AttackRight()
         {
-            Shoot(Vector2Int.Right);
+            Attack(Vector2Int.Right);
+        }
+
+        // todo: Remove this
+        public override void Update(double deltaTime)
+        {
+            _weapon.Update(deltaTime);
         }
     }
 }

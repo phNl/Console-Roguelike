@@ -20,24 +20,24 @@ namespace RogueLike.GameObjects.Projectiles
             }
         }
 
-        private float _speed;
+        private double _speed;
         /// <summary>
         /// How many times will the projectile move in a second
         /// </summary>
-        public float Speed => _speed;
+        public double Speed => _speed;
 
-        private float _lifetimeInSeconds = 0;
-        public float LifetimeInSeconds => _lifetimeInSeconds;
+        private double _lifetimeInSeconds = 0;
+        public double LifetimeInSeconds => _lifetimeInSeconds;
 
-        private float _maxLifetimeInSeconds;
-        public float MaxLifetimeInSeconds => _maxLifetimeInSeconds;
+        private double _maxLifetimeInSeconds;
+        public double MaxLifetimeInSeconds => _maxLifetimeInSeconds;
 
         public bool IsInfiniteLifetime => MaxLifetimeInSeconds < 0;
 
         private bool _isLaunched = false;
         public bool IsLaunched => _isLaunched;
 
-        private float _stayTime = 0;
+        private double _stayTime = 0;
 
         private GameObject? _owner;
         public GameObject? Owner => _owner;
@@ -73,13 +73,12 @@ namespace RogueLike.GameObjects.Projectiles
 
         public abstract void Move(Vector2Int direction);
 
-        public override sealed void Update()
+        public override sealed void Update(double deltaTime)
         {
             if (IsLaunched)
             {
                 if (GameController.GameLoop != null)
                 {
-                    float deltaTime = GameController.GameLoop.DeltaTime;
                     _stayTime += deltaTime;
 
                     if (!IsInfiniteLifetime)

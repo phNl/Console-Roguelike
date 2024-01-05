@@ -4,7 +4,7 @@ using RogueLike.Render;
 
 namespace RogueLike.GameObjects
 {
-    internal abstract class GameObject
+    internal abstract class GameObject : IUpdate
     {
         public event Action<GameObject>? OnDestroyAction;
 
@@ -46,7 +46,7 @@ namespace RogueLike.GameObjects
         {
         }
 
-        public virtual void Update()
+        public virtual void Update(double deltaTime)
         {
         }
 

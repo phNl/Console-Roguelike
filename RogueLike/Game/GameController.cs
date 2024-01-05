@@ -3,6 +3,7 @@ using RogueLike.CustomMath;
 using RogueLike.GameObjects;
 using RogueLike.GameObjects.Characters;
 using RogueLike.Input;
+using RogueLike.Input.Bindings;
 using RogueLike.Maze;
 using RogueLike.Render;
 using RogueLike.RenderTools;
@@ -12,6 +13,7 @@ namespace RogueLike.Game
     internal enum GameState
     {
         InGame,
+        Death
     }
 
     internal static class GameController
@@ -51,6 +53,9 @@ namespace RogueLike.Game
         private static bool _isInitialized = false;
         public static bool IsInitialized => _isInitialized;
 
+        // Binds
+        private static List<BindingHandler>? _bindingHandlers;
+
         public static void Initialize(Vector2Int screenSize, ushort maxFps = 30, string fontName = "Consolas", short fontSize = 14)
         {
             if (IsInitialized)
@@ -67,13 +72,29 @@ namespace RogueLike.Game
             }
 
             _inputActionHandler.CurrentInputActionMap = InputActionMaps?[GameState.InGame];
-            OnPlayerChanged += UpdatePlayerBinds;
 
             InputHandler.RestartReadKeyLoop();
 
             _gameLoop.OnUpdate += OnUpdate;
 
+            _bindingHandlers = new List<BindingHandler>();
+            InitializeBindingHandlers();
+
             _isInitialized = true;
+        }
+
+        private static void InitializeBindingHandlers()
+        {
+            // Initialize binds
+            if (InputActionMaps != null)
+            {
+                _bindingHandlers?.Add(new InGamePlayerBindingHandler(InputActionMaps[GameState.InGame]));
+            }
+
+            foreach (var bindingHandler in _bindingHandlers)
+            {
+                bindingHandler.AddAllBinds();
+            }
         }
 
         public static void LoadLevel(Level level)
@@ -89,23 +110,23 @@ namespace RogueLike.Game
 
         private static void OnLoadLevel()
         {
+            // Maze walls
             MazeGenerator mazeGenerator = new MazeGenerator('#', (char)RenderBuffer.NullSymbol);
-            RenderObject mazeRenderObject = new RenderObject(mazeGenerator.GetMazeRenderPattern(LevelSize, 5));
-            Collider mazeCollider = new Collider(CollisionMap.GetCollisionMapFromRenderPattern(mazeRenderObject.RenderPattern));
-            StaticObject maze = new StaticObject(mazeRenderObject, mazeCollider);
+            RenderObject mazeRenderObject = new RenderObject(mazeGenerator.GetMazeRenderPattern(LevelSize, 7));
+            StaticObject maze = new StaticObject(mazeRenderObject, new Collider(mazeRenderObject));
             maze.Position = Vector2Int.Zero;
             CurrentLevel?.PrepareAddObject(maze);
 
+            // Level exit trigger
             RenderObject levelExitDoorRenderObject = new RenderObject(new RenderBuffer(new string[] { "E" }));
-            Collider levelExitDoorCollider = new Collider(CollisionMap.GetCollisionMapFromRenderPattern(levelExitDoorRenderObject.RenderPattern), true);
+            Collider levelExitDoorCollider = new Collider(levelExitDoorRenderObject, true);
             LevelExitDoor levelExitDoor = new LevelExitDoor(levelExitDoorRenderObject, levelExitDoorCollider);
             levelExitDoor.Position = new Vector2Int(20, 20);
             CurrentLevel?.PrepareAddObject(levelExitDoor);
 
-            RenderBuffer playerRenderBuffer  = new RenderBuffer(new string[] { "O" });
-            RenderObject playerRenderObject = new RenderObject(playerRenderBuffer);
-            Collider playerCollider = new Collider(CollisionMap.GetCollisionMapFromRenderPattern(playerRenderBuffer));
-            Player player = new Player(playerRenderObject, playerCollider);
+            // Player
+            RenderObject playerRenderObject = new RenderObject(new RenderBuffer(new string[] { "O" }));
+            Player player = new Player(playerRenderObject, new Collider(playerRenderObject));
             player.Position = new Vector2Int(16, 5);
             Player = player;
             CurrentLevel?.PrepareAddObject(player);
@@ -131,7 +152,8 @@ namespace RogueLike.Game
             {
                 foreach (var obj in CurrentLevel.Objects)
                 {
-                    obj.Update();
+                    if (GameLoop != null)
+                        obj.Update(GameLoop.DeltaTime);
                 }
             }
         }
@@ -160,35 +182,6 @@ namespace RogueLike.Game
             }
 
             _renderer.Draw();
-        }
-
-        private static void UpdatePlayerBinds(Player? oldPlayer, Player? newPlayer)
-        {
-            if (oldPlayer != null)
-            {
-                _inputActionHandler?.CurrentInputActionMap?.RemoveBind(ConsoleKey.W, oldPlayer.MoveUp);
-                _inputActionHandler?.CurrentInputActionMap?.RemoveBind(ConsoleKey.S, oldPlayer.MoveDown);
-                _inputActionHandler?.CurrentInputActionMap?.RemoveBind(ConsoleKey.A, oldPlayer.MoveLeft);
-                _inputActionHandler?.CurrentInputActionMap?.RemoveBind(ConsoleKey.D, oldPlayer.MoveRight);
-
-                _inputActionHandler?.CurrentInputActionMap?.RemoveBind(ConsoleKey.UpArrow, oldPlayer.ShootUp);
-                _inputActionHandler?.CurrentInputActionMap?.RemoveBind(ConsoleKey.DownArrow, oldPlayer.ShootDown);
-                _inputActionHandler?.CurrentInputActionMap?.RemoveBind(ConsoleKey.LeftArrow, oldPlayer.ShootLeft);
-                _inputActionHandler?.CurrentInputActionMap?.RemoveBind(ConsoleKey.RightArrow, oldPlayer.ShootRight);
-            }
-
-            if (newPlayer != null)
-            {
-                _inputActionHandler?.CurrentInputActionMap?.AddBind(ConsoleKey.W, newPlayer.MoveUp);
-                _inputActionHandler?.CurrentInputActionMap?.AddBind(ConsoleKey.S, newPlayer.MoveDown);
-                _inputActionHandler?.CurrentInputActionMap?.AddBind(ConsoleKey.A, newPlayer.MoveLeft);
-                _inputActionHandler?.CurrentInputActionMap?.AddBind(ConsoleKey.D, newPlayer.MoveRight);
-
-                _inputActionHandler?.CurrentInputActionMap?.AddBind(ConsoleKey.UpArrow, newPlayer.ShootUp);
-                _inputActionHandler?.CurrentInputActionMap?.AddBind(ConsoleKey.DownArrow, newPlayer.ShootDown);
-                _inputActionHandler?.CurrentInputActionMap?.AddBind(ConsoleKey.LeftArrow, newPlayer.ShootLeft);
-                _inputActionHandler?.CurrentInputActionMap?.AddBind(ConsoleKey.RightArrow, newPlayer.ShootRight);
-            }
         }
     }
 }

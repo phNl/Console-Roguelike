@@ -45,6 +45,9 @@
             if (CurrentInputActionMap == null)
                 return;
 
+            if (!CurrentInputActionMap.ActionBinds.ContainsKey(keyInfo.Key))
+                return;
+
             Action[] inputActions = new Action[CurrentInputActionMap.ActionBinds.Count];
             CurrentInputActionMap.ActionBinds[keyInfo.Key].CopyTo(inputActions);
 

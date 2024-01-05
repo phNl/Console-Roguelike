@@ -1,4 +1,6 @@
-﻿namespace RogueLike.Collision
+﻿using RogueLike.Render;
+
+namespace RogueLike.Collision
 {
     internal struct Collider
     {
@@ -16,6 +18,12 @@
         public Collider(CollisionMap collisionMap, bool isTrigger)
         {
             _collisionMap = collisionMap;
+            _isTrigger = isTrigger;
+        }
+
+        public Collider(RenderObject renderObject, bool isTrigger = false)
+        {
+            _collisionMap = Collision.CollisionMap.GetCollisionMapFromRenderPattern(renderObject.RenderPattern);
             _isTrigger = isTrigger;
         }
 

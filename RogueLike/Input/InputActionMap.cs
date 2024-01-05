@@ -1,6 +1,6 @@
 ﻿namespace RogueLike.Input
 {
-    public class InputActionMap
+    public class InputActionMap : IReadOnlyInputActionMap
     {
         private Dictionary<ConsoleKey, List<Action>> _actionBinds;
         public IReadOnlyDictionary<ConsoleKey, List<Action>> ActionBinds => _actionBinds;
