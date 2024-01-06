@@ -8,7 +8,7 @@ namespace RogueLike.GameObjects.Characters
     internal class Player : Character
     {
         // todo: change (or remove)
-        private Weapon _weapon = new RangeWeapon(1f, 5f, 5f, 100);
+        private Weapon _weapon = new RangeWeapon(1f, 5f, 5f, 50);
 
         public Player(RenderObject renderObject, Collider collider) : base(renderObject, collider)
         {
@@ -26,7 +26,7 @@ namespace RogueLike.GameObjects.Characters
         }
 
         // todo: Remove this
-        public override void Update(double deltaTime)
+        protected override sealed void OnUpdate(double deltaTime)
         {
             _weapon.Update(deltaTime);
         }

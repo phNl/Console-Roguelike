@@ -2,15 +2,13 @@
 {
     internal class GameLoop : GameLoopBase
     {
-        public event Action? OnUpdate;
-
         public GameLoop(ushort maxFps) : base(maxFps)
         {
         }
 
-        protected override void Update()
+        protected override void Update(double deltaTime)
         {
-            OnUpdate?.Invoke();
+            GameController.OnGameLoopTick(deltaTime);
         }
     }
 }

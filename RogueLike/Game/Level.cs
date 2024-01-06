@@ -5,7 +5,7 @@ namespace RogueLike.Game
     internal class Level
     {
         private List<GameObject> _objects;
-        public IReadOnlyList<GameObject> Objects => _objects;
+        public IReadOnlyList<GameObject> Objects => new List<GameObject>(_objects);
 
         private List<GameObject> _objectsToRemove = new List<GameObject>();
         private List<GameObject> _objectsToAdd = new List<GameObject>();

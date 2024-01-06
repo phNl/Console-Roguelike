@@ -1,5 +1,6 @@
 ﻿using RogueLike.Collision;
 using RogueLike.CustomMath;
+using RogueLike.GameObjects.Characters.Properties;
 using RogueLike.Render;
 
 namespace RogueLike.GameObjects.Projectiles
@@ -22,18 +23,31 @@ namespace RogueLike.GameObjects.Projectiles
 
         protected void UpdateCollision()
         {
-            List<GameObject> excludeGO = new List<GameObject>();
+            List<GameObject> excludeGOList = new List<GameObject>();
             if (Owner != null)
-                excludeGO.Add(Owner);
-
-            if (CollisionHandler.HasCollisionWithAny(this, CollisionMode.Only_Colliders, excludeGO))
             {
-                OnCollision();
+                excludeGOList.Add(Owner);
+            }
+
+            List<GameObject> collisionObjects = CollisionHandler.GetCollisionObjects(this, excludeGameObjects: excludeGOList).Keys.ToList();
+
+            if (collisionObjects.Count > 0)
+            {
+                OnCollision(collisionObjects);
             }
         }
 
-        protected override void OnCollision()
+        protected override void OnCollision(List<GameObject> collisionGameObjects)
         {
+            foreach (var collisionObject in collisionGameObjects)
+            {
+                IDamagable? damagableObject = collisionObject as IDamagable;
+                if (damagableObject != null)
+                {
+                    damagableObject.Damage(Damage);
+                }
+            }
+
             Destroy();
         }
 
@@ -42,7 +56,7 @@ namespace RogueLike.GameObjects.Projectiles
             UpdateCollision();
         }
 
-        protected override void OnUpdate()
+        protected override void OnInnerUpdate()
         {
             UpdateCollision();
         }

@@ -28,25 +28,36 @@ namespace RogueLike.GameObjects
             set => _renderObject = value;
         }
 
+        private bool _isPreparedToDestroy = false;
+        public bool IsPreparedToDestroy => _isPreparedToDestroy;
+
         public GameObject(RenderObject renderObject, Collider collider)
         {
             _renderObject = renderObject;
             _collider = collider;
         }
 
-        public virtual void Update(double deltaTime)
+        public void Update(double deltaTime)
         {
+            if (!IsPreparedToDestroy)
+            {
+                OnUpdate(deltaTime);
+            }
         }
 
         public void Destroy()
         {
+            _isPreparedToDestroy = true;
             OnDestroy();
             OnDestroyAction?.Invoke(this);
         }
 
+        protected virtual void OnUpdate(double deltaTime)
+        {
+        }
+
         protected virtual void OnDestroy()
         {
-
         }
     }
 }

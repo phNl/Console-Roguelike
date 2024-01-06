@@ -59,7 +59,7 @@ namespace RogueLike.Game
         // Binds
         private static List<BindingHandler>? _bindingHandlers;
 
-        public static void Initialize(Vector2Int screenSize, ushort maxFps = 30, string fontName = "Consolas", short fontSize = 14)
+        public static void Initialize(Vector2Int screenSize, ushort maxFps = 60, string fontName = "Consolas", short fontSize = 14)
         {
             if (IsInitialized)
                 return;
@@ -77,8 +77,6 @@ namespace RogueLike.Game
             _inputActionHandler.CurrentInputActionMap = InputActionMaps?[GameState.InGame];
 
             InputHandler.RestartReadKeyLoop();
-
-            _gameLoop.OnUpdate += OnUpdate;
 
             _bindingHandlers = new List<BindingHandler>();
             InitializeBindingHandlers();
@@ -144,19 +142,19 @@ namespace RogueLike.Game
             CurrentLevel?.PrepareAddObject(enemy);
         }
 
-        private static void OnUpdate()
+        public static void OnGameLoopTick(double deltaTime)
         {
-            PreUpdate();
-            Update();
-            AfterUpdate();
+            PreUpdate(deltaTime);
+            Update(deltaTime);
+            AfterUpdate(deltaTime);
         }
 
-        private static void PreUpdate()
+        private static void PreUpdate(double deltaTime)
         {
             CurrentLevel?.AddPreparedObjects();
         }
 
-        private static void Update()
+        private static void Update(double deltaTime)
         {
             _inputActionHandler?.ProcessInputActions();
 
@@ -165,12 +163,12 @@ namespace RogueLike.Game
                 foreach (var obj in CurrentLevel.Objects)
                 {
                     if (GameLoop != null)
-                        obj.Update(GameLoop.DeltaTime);
+                        obj.Update(deltaTime);
                 }
             }
         }
 
-        private static void AfterUpdate()
+        private static void AfterUpdate(double deltaTime)
         {
             CurrentLevel?.RemovePreparedObjects();
             RenderUpdate();

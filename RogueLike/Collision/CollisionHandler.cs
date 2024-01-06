@@ -101,29 +101,59 @@ namespace RogueLike.Collision
             return points;
         }
 
-        public static Dictionary<GameObject, List<Vector2Int>> GetCollisionObjects(Level? level, GameObject gameObject, CollisionMode collisionMode = CollisionMode.All)
+        public static Dictionary<GameObject, List<Vector2Int>> GetCollisionObjects(
+            Level? level,
+            GameObject gameObject,
+            List<GameObject>? excludeGameObjects = null,
+            CollisionMode collisionMode = CollisionMode.All
+        )
         {
             var objectsWithPoints = new Dictionary<GameObject, List<Vector2Int>>();
 
             if (level == null)
                 return objectsWithPoints;
-    
-            foreach (var obj in level.Objects)
+
+            List<GameObject> levelObjects = new List<GameObject>(level.Objects);
+            levelObjects.Remove(gameObject);
+            if (excludeGameObjects != null)
+            {
+                foreach (var obj in excludeGameObjects)
+                {
+                    levelObjects.Remove(obj);
+                }
+            }
+
+            foreach (var obj in levelObjects)
             {
                 if (IsSuitableCollider(collisionMode, obj.Collider))
-                    objectsWithPoints.Add(obj, GetCollisionPointsBetweenObjects(gameObject, obj));
+                {
+                    List<Vector2Int> collisionPoints = GetCollisionPointsBetweenObjects(gameObject, obj);
+                    if (collisionPoints.Count > 0)
+                    {
+                        objectsWithPoints.Add(obj, collisionPoints);
+                    }
+                }
             }
 
             return objectsWithPoints;
         }
 
-        public static Dictionary<GameObject, List<Vector2Int>> GetCollisionObjects(GameObject gameObject, CollisionMode collisionMode = CollisionMode.All)
+        public static Dictionary<GameObject, List<Vector2Int>> GetCollisionObjects(
+            GameObject gameObject,
+            List<GameObject>? excludeGameObjects = null,
+            CollisionMode collisionMode = CollisionMode.All
+        )
         {
-            return GetCollisionObjects(GameController.CurrentLevel, gameObject);
+            return GetCollisionObjects(GameController.CurrentLevel, gameObject, excludeGameObjects, collisionMode);
         }
 
 
-        public static bool HasCollisionWithAny(Level? level, GameObject gameObject, CollisionMode collisionMode = CollisionMode.All, List<GameObject>? excludeGameObjects = null)
+        public static bool HasCollisionWithAny(
+            Level? level,
+            GameObject gameObject,
+            CollisionMode collisionMode = CollisionMode.All,
+            List<GameObject>? excludeGameObjects = null
+        )
         {
             if (level == null)
                 return false;
@@ -148,7 +178,11 @@ namespace RogueLike.Collision
             return false;
         }
 
-        public static bool HasCollisionWithAny(GameObject gameObject, CollisionMode collisionMode = CollisionMode.All, List<GameObject>? excludeGameObjects = null)
+        public static bool HasCollisionWithAny(
+            GameObject gameObject,
+            CollisionMode collisionMode = CollisionMode.All,
+            List<GameObject>? excludeGameObjects = null
+        )
         {
             return HasCollisionWithAny(GameController.CurrentLevel, gameObject, collisionMode, excludeGameObjects);
         }

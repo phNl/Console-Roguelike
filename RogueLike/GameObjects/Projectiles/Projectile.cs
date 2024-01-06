@@ -62,7 +62,7 @@ namespace RogueLike.GameObjects.Projectiles
 
         public abstract void Move(Vector2Int direction);
 
-        public override sealed void Update(double deltaTime)
+        protected override sealed void OnUpdate(double deltaTime)
         {
             if (IsLaunched)
             {
@@ -87,14 +87,14 @@ namespace RogueLike.GameObjects.Projectiles
                 }
             }
 
-            OnUpdate();
+            OnInnerUpdate();
         }
 
         protected virtual void OnLaunch()
         {
         }
 
-        protected virtual void OnCollision()
+        protected virtual void OnCollision(List<GameObject> collisionGameObjects)
         {
         }
 
@@ -102,7 +102,7 @@ namespace RogueLike.GameObjects.Projectiles
         {
         }
 
-        protected virtual void OnUpdate()
+        protected virtual void OnInnerUpdate()
         {
         }
     }

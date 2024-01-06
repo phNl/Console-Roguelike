@@ -2,7 +2,10 @@
 {
     internal abstract class GameLoopBase
     {
-        private System.Timers.Timer _gameTimer;
+        private bool _isGameLoopEnded = false;
+        private readonly Thread _loopThread;
+
+        protected double LoopInterval => 1f / (double)FPSMax;
 
         private ushort _fpsMax;
         public ushort FPSMax
@@ -11,48 +14,79 @@
             get => _fpsMax;
         }
 
-        private const long TicksPerSecond = 10000000;
+        private bool _isFirstUpdateAfterPause = true;
+        private DateTime _lastLoopTickTime;
+        private DateTime _lastUpdateTime;
 
-        private DateTime _lastUpdatingTime;
+        private double _timerInSeconds = 0;
 
-        private double _deltaTime = 0;
-        public double DeltaTime => _deltaTime;
+        private bool _isPaused = true;
+        public bool IsPaused => _isPaused;
 
         public GameLoopBase(ushort fpsMax)
         {
             FPSMax = fpsMax;
-
-            _gameTimer = new System.Timers.Timer();
-            _gameTimer.Interval = 1000 / FPSMax;
-            _gameTimer.Elapsed += InnerUpdate;
-            _gameTimer.Start();
+            _loopThread = new Thread(StartLoop);
+            _loopThread.Start();
+            Pause();
         }
 
         ~GameLoopBase()
         {
-            Pause();
-            _gameTimer.Elapsed -= InnerUpdate;
+            Stop();
         }
 
         public void Pause()
         {
-            _gameTimer.Stop();
+            _isFirstUpdateAfterPause = true;
+            _isPaused = true;
         }
 
         public void Unpause()
         {
-            _gameTimer.Start();
+            _isPaused = false;
         }
 
-        protected abstract void Update();
-
-        private void InnerUpdate(object? sender, System.Timers.ElapsedEventArgs e)
+        public void Stop()
         {
-            //_deltaTime = (float)(e.SignalTime - _lastUpdatingTime).Ticks / TicksPerSecond;
-            _deltaTime = (e.SignalTime - _lastUpdatingTime).TotalSeconds;
-            _lastUpdatingTime = e.SignalTime;
+            _isGameLoopEnded = true;
+        }
 
-            Update();
+        protected abstract void Update(double deltaTime);
+
+        private void InnerUpdate()
+        {
+            if (_isFirstUpdateAfterPause)
+            {
+                _isFirstUpdateAfterPause = false;
+            }
+            else
+            {
+                Update((DateTime.Now - _lastUpdateTime).TotalSeconds);
+            }
+
+            _lastUpdateTime = DateTime.Now;
+        }
+
+        private void StartLoop()
+        {
+            _lastLoopTickTime = DateTime.Now;
+
+            while (!_isGameLoopEnded)
+            {
+                if (!IsPaused)
+                {
+                    _timerInSeconds += (DateTime.Now - _lastLoopTickTime).TotalSeconds;
+
+                    while (_timerInSeconds >= LoopInterval)
+                    {
+                        _timerInSeconds -= LoopInterval;
+                        InnerUpdate();
+                    }
+                }
+
+                _lastLoopTickTime = DateTime.Now;
+            }
         }
     }
 }

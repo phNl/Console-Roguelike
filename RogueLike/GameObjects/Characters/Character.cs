@@ -25,6 +25,7 @@ namespace RogueLike.GameObjects.Characters
 
         public Character(RenderObject renderObject, Collider collider) : base(renderObject, collider)
         {
+            _health.ValueChangedToMinimum += Kill;
         }
 
         public abstract void Attack(Vector2Int direction);
