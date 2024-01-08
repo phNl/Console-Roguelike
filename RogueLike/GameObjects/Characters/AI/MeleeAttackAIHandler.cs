@@ -3,26 +3,18 @@ using RogueLike.Game;
 
 namespace RogueLike.GameObjects.Characters.AI
 {
-    internal class RangeAttackAIHandler : AttackAIHandler
+    internal class MeleeAttackAIHandler : AttackAIHandler
     {
-        private int _attackRange;
-        public int AttackRange => _attackRange;
-
-        public RangeAttackAIHandler(Enemy enemy, int attackRange) : base(enemy)
+        public MeleeAttackAIHandler(Enemy enemy) : base(enemy)
         {
-            _attackRange = attackRange;
         }
 
         protected override void InternalHandleAttack()
         {
-            if (Enemy.PathMemoryCopy.Count <= 0)
-            {
-                return;
-            }
-
             if (GameController.Player != null)
             {
-                if (Enemy.PathMemoryCopy.Count < AttackRange)
+                if (Enemy.PathMemoryCopy.Count <= 0 &&
+                    Enemy.Position - GameController.Player.Position <= new Vector2Int(1, 1))
                 {
                     var posDifference = GameController.Player.Position - Enemy.Position;
                     Vector2Int attackDirection;

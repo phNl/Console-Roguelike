@@ -14,17 +14,18 @@ namespace RogueLike.GameObjects.Characters.AI
 
         public Stack<Vector2Int> PathMemoryCopy => MoveAIHandler.PathMemoryCopy;
 
-        private Weapon _weapon;
-        public IReadOnlyWeapon Weapon => _weapon;
-
-        public Enemy(RenderObject renderObject, Collider collider, Weapon weapon) : base(renderObject, collider)
+        public Enemy(
+            RenderObject renderObject,
+            Collider collider,
+            Weapon weapon,
+            int maxHealthValue
+            ) : base(renderObject, collider, weapon, maxHealthValue)
         {
-            _weapon = weapon;
         }
 
         public override sealed void Attack(Vector2Int direction)
         {
-            _weapon.Attack(Position, direction, this);
+            Weapon.Attack(Position, direction, this);
         }
 
         public override sealed void Kill()
@@ -34,7 +35,8 @@ namespace RogueLike.GameObjects.Characters.AI
 
         protected override sealed void OnUpdate(double deltaTime)
         {
-            _weapon.Update(deltaTime);
+            base.OnUpdate(deltaTime);
+
             MoveAIHandler.HandleMove(deltaTime);
             AttackAIHandler.HandleAttack();
         }

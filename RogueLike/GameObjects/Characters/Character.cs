@@ -2,6 +2,7 @@
 using RogueLike.CustomMath;
 using RogueLike.GameObjects.Characters.Properties;
 using RogueLike.Render;
+using RogueLike.Weapons;
 
 namespace RogueLike.GameObjects.Characters
 {
@@ -18,13 +19,19 @@ namespace RogueLike.GameObjects.Characters
         /// </summary>
         public event Action<Vector2Int>? OnMove;
 
-        private Health _health = new Health();
+        private Health _health;
         public IReadOnlyHealth Health => _health;
 
         public virtual bool CanMove => true;
 
-        public Character(RenderObject renderObject, Collider collider) : base(renderObject, collider)
+        private Weapon _weapon;
+        protected Weapon Weapon => _weapon;
+        public IReadOnlyWeapon WeaponInfo => _weapon;
+
+        public Character(RenderObject renderObject, Collider collider, Weapon weapon, int maxHealthValue) : base(renderObject, collider)
         {
+            _weapon = weapon;
+            _health = new Health(maxHealthValue);
             _health.ValueChangedToMinimum += Kill;
         }
 
@@ -96,6 +103,11 @@ namespace RogueLike.GameObjects.Characters
         public void Heal(int health)
         {
             _health.Heal(health);
+        }
+
+        protected override void OnUpdate(double deltaTime)
+        {
+            Weapon.Update(deltaTime);
         }
     }
 }

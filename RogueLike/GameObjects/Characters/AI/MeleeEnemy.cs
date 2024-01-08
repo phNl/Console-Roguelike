@@ -4,7 +4,7 @@ using RogueLike.Weapons;
 
 namespace RogueLike.GameObjects.Characters.AI
 {
-    internal class RangeEnemy : Enemy
+    internal class MeleeEnemy : Enemy
     {
         private AttackAIHandler _attackAIHandler;
         protected override AttackAIHandler AttackAIHandler => _attackAIHandler;
@@ -12,19 +12,17 @@ namespace RogueLike.GameObjects.Characters.AI
         private MoveAIHandler _moveAIHandler;
         protected override MoveAIHandler MoveAIHandler => _moveAIHandler;
 
-        public RangeEnemy(
+        public MeleeEnemy(
             RenderObject renderObject,
             Collider collider,
             Weapon weapon,
             int maxHealthValue,
-            int attackRange,
             double moveCooldownInSeconds,
-            int playerFindDepth,
-            int minDistanceToPlayer
+            int playerFindDepth
             ) : base(renderObject, collider, weapon, maxHealthValue)
         {
-            _attackAIHandler = new RangeAttackAIHandler(this, attackRange);
-            _moveAIHandler = new RangeMoveAIHandler(this, moveCooldownInSeconds, playerFindDepth, minDistanceToPlayer);
+            _attackAIHandler = new MeleeAttackAIHandler(this);
+            _moveAIHandler = new MeleeMoveAIHandler(this, moveCooldownInSeconds, playerFindDepth);
         }
     }
 }

@@ -6,6 +6,16 @@
         {
         }
 
-        public abstract void HandleAttack();
+        protected abstract void InternalHandleAttack();
+
+        public void HandleAttack()
+        {
+            if (!Enemy.WeaponInfo.CanAttack)
+            {
+                return;
+            }
+
+            InternalHandleAttack();
+        }
     }
 }

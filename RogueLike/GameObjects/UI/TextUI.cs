@@ -45,7 +45,7 @@ namespace RogueLike.GameObjects.UI
             }
             else
             {
-                return text.Substring(0, textLength);
+                return text[..textLength];
             }
         }
 

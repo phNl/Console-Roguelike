@@ -21,19 +21,15 @@ namespace RogueLike.Game.Levels
             levelExitDoor.Position = new Vector2Int(20, 20);
             level.PrepareAddObject(levelExitDoor);
 
-            // Test Enemy
-            RenderObject enemyRenderObject = new RenderObject(new RenderBuffer(new string[] { "X" }));
-            Enemy enemy = new RangeEnemy(
-                renderObject: enemyRenderObject,
-                collider: new Collider(enemyRenderObject),
-                weapon: new RangeWeapon(1.5, 5, 5, 25),
-                attackRange: 15,
-                moveCooldownInSeconds: 1,
-                playerFindDepth: 35,
-                minDistanceToPlayer: 7
-                );
-            enemy.Position = new Vector2Int(25, 10);
-            level.PrepareAddObject(enemy);
+            // Test Range Enemy
+            var rangeEnemy = EnemyGenerator.GenerateRangeEnemy();
+            rangeEnemy.Position = new Vector2Int(25, 10);
+            level.PrepareAddObject(rangeEnemy);
+
+            // Test Melee Enemy
+            var meleeEnemy = EnemyGenerator.GenerateMeleeEnemy();
+            meleeEnemy.Position = new Vector2Int(10, 25);
+            level.PrepareAddObject(meleeEnemy);
 
             level.AddPreparedObjects();
             return level;

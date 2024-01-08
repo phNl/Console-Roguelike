@@ -43,8 +43,7 @@ namespace RogueLike.GameObjects.Characters.AI
         {
             StaticObject maze;
 
-            var mazeLevel = GameController.CurrentLevel as MazeLevel;
-            if (mazeLevel != null)
+            if (GameController.CurrentLevel is MazeLevel mazeLevel)
             {
                 maze = mazeLevel.Maze;
             }

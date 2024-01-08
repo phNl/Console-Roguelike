@@ -9,6 +9,7 @@ using RogueLike.Input.Bindings;
 using RogueLike.Maze;
 using RogueLike.Render;
 using RogueLike.RenderTools;
+using RogueLike.Weapons;
 using System.Reflection.Emit;
 
 namespace RogueLike.Game
@@ -146,7 +147,8 @@ namespace RogueLike.Game
                 {
                     // Player
                     RenderObject playerRenderObject = new RenderObject(new RenderBuffer(new string[] { "O" }));
-                    Player = new Player(playerRenderObject, new Collider(playerRenderObject));
+                    RangeWeapon playerWeapon = new RangeWeapon(1, 5, 10, 50);
+                    Player = new Player(playerRenderObject, new Collider(playerRenderObject), playerWeapon, 100);
                 }
 
                 // todo: change position to random
