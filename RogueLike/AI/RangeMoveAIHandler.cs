@@ -1,7 +1,8 @@
 ﻿using RogueLike.CustomMath;
 using RogueLike.Game;
+using RogueLike.GameObjects.Characters.AIEnemies;
 
-namespace RogueLike.GameObjects.Characters.AI
+namespace RogueLike.AI
 {
     internal class RangeMoveAIHandler : MoveAIHandler
     {

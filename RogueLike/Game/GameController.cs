@@ -6,11 +6,9 @@ using RogueLike.GameObjects.Characters;
 using RogueLike.GameObjects.UI;
 using RogueLike.Input;
 using RogueLike.Input.Bindings;
-using RogueLike.Maze;
 using RogueLike.Render;
 using RogueLike.RenderTools;
 using RogueLike.Weapons;
-using System.Reflection.Emit;
 
 namespace RogueLike.Game
 {
@@ -139,44 +137,116 @@ namespace RogueLike.Game
 
         public static void GenerateAndLoadInGameLevel()
         {
-            LoadLevel(LevelsGenerator.GenerateInGameLevel());
+            GenerateAndLoadInGameLevel(
+                playerSpawnArea: new Tuple<Vector2Int, Vector2Int>(Vector2Int.Zero, new Vector2Int(LevelSize.x - 1, LevelSize.y / 8)),
+                exitSpawnArea: new Tuple<Vector2Int, Vector2Int>(new Vector2Int(0, LevelSize.y / 8 * 7), LevelSize - 1),
+                enemiesSpawnArea: new Tuple<Vector2Int, Vector2Int>(LevelSize / 6, LevelSize - 1),
+                rangeEnemiesCount: 5,
+                meleeEnemiesCount: 10
+                );
+        }
 
-            if (CurrentLevel as MazeLevel != null)
+        public static void GenerateAndLoadInGameLevel(
+            Tuple<Vector2Int, Vector2Int> playerSpawnArea,
+            Tuple<Vector2Int, Vector2Int> exitSpawnArea,
+            Tuple<Vector2Int, Vector2Int> enemiesSpawnArea,
+            int rangeEnemiesCount,
+            int meleeEnemiesCount
+            )
+        {
+            MazeLevel level = new MazeLevel();
+            List<Vector2Int> mazeEmptyCells = level.Maze.GetEmptyCells();
+
+            // Level exit trigger
+            RenderObject levelExitDoorRenderObject = new RenderObject(new RenderBuffer(new string[] { "E" }));
+            Collider levelExitDoorCollider = new Collider(levelExitDoorRenderObject, true);
+            LevelExitDoor levelExitDoor = new LevelExitDoor(levelExitDoorRenderObject, levelExitDoorCollider, 50);
+            List<Vector2Int> mazeRandomCells = 
+                mazeEmptyCells.FindAll((Vector2Int) => Vector2Int.InRectangle(exitSpawnArea.Item1, exitSpawnArea.Item2));
+            levelExitDoor.Position = mazeRandomCells[Random.Shared.Next(0, mazeRandomCells.Count)];
+            level.PrepareAddObject(levelExitDoor);
+
+            // Player
+            if (Player == null)
             {
-                if (Player == null)
-                {
-                    // Player
-                    RenderObject playerRenderObject = new RenderObject(new RenderBuffer(new string[] { "O" }));
-                    RangeWeapon playerWeapon = new RangeWeapon(1, 5, 10, 50);
-                    Player = new Player(playerRenderObject, new Collider(playerRenderObject), playerWeapon, 100);
-                }
+                RenderObject playerRenderObject = new RenderObject(new RenderBuffer(new string[] { "O" }));
+                RangeWeapon playerWeapon = new RangeWeapon(1, 5, 10, 50);
+                Player = new Player(playerRenderObject, new Collider(playerRenderObject), playerWeapon, 100);
+            }
+            if (Player.Health.Value <= Player.Health.MinValue)
+            {
+                Player.Heal(Player.Health.MaxValue);
+            }
+            List<Vector2Int> playerRandomCells = 
+                mazeEmptyCells.FindAll((Vector2Int) => Vector2Int.InRectangle(playerSpawnArea.Item1, playerSpawnArea.Item2));
+            Player.Position = playerRandomCells[Random.Shared.Next(0, playerRandomCells.Count)];
+            level.PrepareAddObject(Player);
 
-                // todo: change position to random
-                Player.Position = new Vector2Int(16, 5);
-                CurrentLevel.PrepareAddObject(Player);
+            // Player UI
+            TextUI healthTextUI = new TextUI("Health:");
+            healthTextUI.Position = new Vector2Int(5, UIAreaPosition.y + 1);
+            level.PrepareAddObject(healthTextUI);
 
-                // UI
-                TextUI healthTextUI = new TextUI("Health:");
-                healthTextUI.Position = new Vector2Int(5, UIAreaPosition.y + 1);
-                CurrentLevel.PrepareAddObject(healthTextUI);
-
-                if (Player != null)
-                {
-                    TextUI healthValueTextUI = new TextUI(Player.Health.MaxValue.ToString());
-                    healthValueTextUI.Position = healthTextUI.Position + new Vector2Int(healthTextUI.TextLength + 1, 0);
-                    // todo: Вынести в скрипт UI Handler
-                    Player.Health.ValueChanged += (prevHP, newHP) => healthValueTextUI.Text = newHP.ToString();
-                    CurrentLevel.PrepareAddObject(healthValueTextUI);
-                }
+            if (Player != null)
+            {
+                TextUI healthValueTextUI = new TextUI(Player.Health.Value.ToString());
+                healthValueTextUI.Position = healthTextUI.Position + new Vector2Int(healthTextUI.TextLength + 1, 0);
+                Player.Health.ValueChanged += (prevHP, newHP) => healthValueTextUI.Text = newHP.ToString();
+                level.PrepareAddObject(healthValueTextUI);
             }
 
+            List<Vector2Int> randomEnemyCells =
+                        mazeEmptyCells.FindAll((Vector2Int) => Vector2Int.InRectangle(enemiesSpawnArea.Item1, enemiesSpawnArea.Item2));
+
+            // Range enemies
+            for (int i = 0; i < rangeEnemiesCount; i++)
+            {
+                var rangeEnemy = EnemyGenerator.GenerateRangeEnemy();
+                rangeEnemy.Position = randomEnemyCells[Random.Shared.Next(0, randomEnemyCells.Count)];
+                level.PrepareAddObject(rangeEnemy);
+            }
+
+            // Melee enemies
+            for (int i = 0; i < meleeEnemiesCount; i++)
+            {
+                var meleeEnemy = EnemyGenerator.GenerateMeleeEnemy();
+                meleeEnemy.Position = randomEnemyCells[Random.Shared.Next(0, randomEnemyCells.Count)];
+                level.PrepareAddObject(meleeEnemy);
+            }
+
+            level.AddPreparedObjects();
             ChangeInputActionMap(GameState.InGame);
+
+            LoadLevel(level);
         }
 
         public static void GenerateAndLoadDeathScreenLevel()
         {
-            LoadLevel(LevelsGenerator.GenerateDeathScreenLevel());
+            DeathScreenLevel level = new DeathScreenLevel();
+
+            TextUI deathTextUI = new TextUI("YOU DIED");
+            deathTextUI.Position = LevelSize / 2 - new Vector2Int(deathTextUI.TextLength / 2, LevelSize.y / 3);
+            level.PrepareAddObject(deathTextUI);
+
+            TextUI quitTextUI = new TextUI("QUIT");
+            quitTextUI.Position = LevelSize / new Vector2Int(3, 3) - new Vector2Int(quitTextUI.TextLength / 2, 0);
+            level.PrepareAddObject(quitTextUI);
+
+            TextUI quitButtonTextUI = new TextUI("[Esc]");
+            quitButtonTextUI.Position = quitTextUI.Position + new Vector2Int(0, 1);
+            level.PrepareAddObject(quitButtonTextUI);
+
+            TextUI continueTextUI = new TextUI("CONTINUE");
+            continueTextUI.Position = LevelSize / new Vector2Int(3, 3) * new Vector2Int(2, 1) - new Vector2Int(continueTextUI.TextLength / 2, 0);
+            level.PrepareAddObject(continueTextUI);
+
+            TextUI continueButtonTextUI = new TextUI("[Enter]");
+            continueButtonTextUI.Position = continueTextUI.Position + new Vector2Int(0, 1);
+            level.PrepareAddObject(continueButtonTextUI);
+
+            level.AddPreparedObjects();
             ChangeInputActionMap(GameState.Death);
+            LoadLevel(level);
         }
 
         public static void ChangeInputActionMap(GameState gameState)

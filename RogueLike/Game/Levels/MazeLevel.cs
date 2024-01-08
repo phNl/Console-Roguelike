@@ -1,17 +1,15 @@
-﻿using RogueLike.Collision;
-using RogueLike.CustomMath;
+﻿using RogueLike.CustomMath;
 using RogueLike.GameObjects;
-using RogueLike.Maze;
 using RogueLike.Render;
 
 namespace RogueLike.Game.Levels
 {
     internal class MazeLevel : Level
     {
-        private StaticObject _maze;
-        public StaticObject Maze => _maze;
+        private GameObjects.Maze _maze;
+        public GameObjects.Maze Maze => _maze;
 
-        public MazeLevel(StaticObject maze, List<GameObject> objects) : base(objects)
+        public MazeLevel(GameObjects.Maze maze, List<GameObject> objects) : base(objects)
         {
             _maze = maze;
             _maze.Position = Vector2Int.Zero;
@@ -27,13 +25,9 @@ namespace RogueLike.Game.Levels
         {
         }
 
-        private static StaticObject GenerateMazeObject()
+        private static GameObjects.Maze GenerateMazeObject()
         {
-            // Maze
-            RenderObject mazeRenderObject = new RenderObject(MazeGenerator.Shared.GetMazeRenderPattern(GameController.PlayAreaSize, 7));
-            StaticObject maze = new StaticObject(mazeRenderObject, new Collider(mazeRenderObject));
-
-            return maze;
+            return new GameObjects.Maze(GameController.PlayAreaSize, '#', (char)RenderBuffer.NullSymbol, null, 7);
         }
     }
 }

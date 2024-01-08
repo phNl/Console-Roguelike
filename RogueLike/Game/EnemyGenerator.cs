@@ -1,5 +1,5 @@
 ﻿using RogueLike.Collision;
-using RogueLike.GameObjects.Characters.AI;
+using RogueLike.GameObjects.Characters.AIEnemies;
 using RogueLike.Render;
 using RogueLike.Weapons;
 

@@ -1,9 +1,10 @@
-﻿using RogueLike.Collision;
+﻿using RogueLike.AI;
+using RogueLike.Collision;
 using RogueLike.CustomMath;
 using RogueLike.Render;
 using RogueLike.Weapons;
 
-namespace RogueLike.GameObjects.Characters.AI
+namespace RogueLike.GameObjects.Characters.AIEnemies
 {
     internal abstract class Enemy : Character
     {

@@ -2,8 +2,10 @@
 using RogueLike.Game.Levels;
 using RogueLike.Game;
 using RogueLike.Maze;
+using RogueLike.GameObjects;
+using RogueLike.GameObjects.Characters.AIEnemies;
 
-namespace RogueLike.GameObjects.Characters.AI
+namespace RogueLike.AI
 {
     internal abstract class MoveAIHandler : AIHandler
     {
@@ -41,7 +43,7 @@ namespace RogueLike.GameObjects.Characters.AI
 
         private void UpdatePathMemory()
         {
-            StaticObject maze;
+            GameObjects.Maze maze;
 
             if (GameController.CurrentLevel is MazeLevel mazeLevel)
             {

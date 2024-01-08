@@ -230,5 +230,10 @@
         {
             return GetNeighborsPositions(this);
         }
+
+        public static Vector2Int GetRandomVector(Vector2Int minVector, Vector2Int maxVector)
+        {
+            return new Vector2Int(Random.Shared.Next(minVector.x, maxVector.x), Random.Shared.Next(minVector.y, maxVector.y));
+        }
     }
 }

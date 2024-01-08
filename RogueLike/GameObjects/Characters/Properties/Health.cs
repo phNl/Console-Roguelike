@@ -17,6 +17,7 @@
 
             private set
             {
+                value = Math.Clamp(value, MinValue, MaxValue);
                 if (__value != value)
                 {
                     ValueChanged?.Invoke(__value, value);
@@ -63,19 +64,16 @@
 
         public void Damage(int damage)
         {
-            damage = Math.Max(damage, 0);
             Value -= damage;
         }
 
         public void Heal(int health)
         {
-            health = Math.Max(health, 0);
             Value += health;
         }
 
         public void SetHealth(int health)
         {
-            health = Math.Clamp(health, MinValue, MaxValue);
             Value = health;
         }
     }

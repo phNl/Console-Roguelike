@@ -1,4 +1,6 @@
-﻿namespace RogueLike.GameObjects.Characters.AI
+﻿using RogueLike.GameObjects.Characters.AIEnemies;
+
+namespace RogueLike.AI
 {
     internal abstract class AttackAIHandler : AIHandler
     {

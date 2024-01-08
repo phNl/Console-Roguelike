@@ -1,8 +1,8 @@
 ﻿using RogueLike.Collision;
 using RogueLike.CustomMath;
 using RogueLike.Game;
-using RogueLike.Game.Levels;
 using RogueLike.GameObjects.Characters;
+using RogueLike.GameObjects.Characters.Properties;
 using RogueLike.Render;
 
 namespace RogueLike.GameObjects
@@ -13,8 +13,12 @@ namespace RogueLike.GameObjects
 
         private bool _isTriggered = false;
 
-        public LevelExitDoor(RenderObject renderObject, Collider collider) : base(renderObject, collider)
+        private int _healValue;
+
+        public LevelExitDoor(RenderObject renderObject, Collider collider, int healValue) : base(renderObject, collider)
         {
+            _healValue = healValue;
+
             UpdateSubscriptionToPlayer(null, GameController.Player);
             GameController.OnPlayerChanged += UpdateSubscriptionToPlayer;
         }
@@ -28,6 +32,7 @@ namespace RogueLike.GameObjects
                 {
                     OnPlayerTriggered?.Invoke();
                     _isTriggered = true;
+                    (GameController.Player as IHealable)?.Heal(_healValue);
                     GameController.GenerateAndLoadInGameLevel();
                 }
             }
