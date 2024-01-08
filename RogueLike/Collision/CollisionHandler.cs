@@ -1,5 +1,6 @@
 ﻿using RogueLike.CustomMath;
 using RogueLike.Game;
+using RogueLike.Game.Levels;
 using RogueLike.GameObjects;
 
 namespace RogueLike.Collision

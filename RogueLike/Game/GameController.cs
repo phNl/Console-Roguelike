@@ -1,5 +1,6 @@
 ﻿using RogueLike.Collision;
 using RogueLike.CustomMath;
+using RogueLike.Game.Levels;
 using RogueLike.GameObjects;
 using RogueLike.GameObjects.Characters;
 using RogueLike.GameObjects.UI;
@@ -8,6 +9,7 @@ using RogueLike.Input.Bindings;
 using RogueLike.Maze;
 using RogueLike.Render;
 using RogueLike.RenderTools;
+using System.Reflection.Emit;
 
 namespace RogueLike.Game
 {
@@ -42,10 +44,8 @@ namespace RogueLike.Game
             }
         }
 
-        private static StaticObject? _maze;
-        public static StaticObject? Maze => _maze;
-
         private static InputActionHandler? _inputActionHandler;
+
         private static Renderer? _renderer;
 
         private static GameLoop? _gameLoop;
@@ -60,8 +60,8 @@ namespace RogueLike.Game
         private static Vector2Int _playAreaSize;
         public static Vector2Int PlayAreaSize => _playAreaSize;
 
-        private static Vector2Int UIAreaPosition => new Vector2Int(0, PlayAreaSize.y);
-        private static Vector2Int UIAreaSize => LevelSize - PlayAreaSize;
+        public static Vector2Int UIAreaPosition => new Vector2Int(0, PlayAreaSize.y);
+        public static Vector2Int UIAreaSize => LevelSize - PlayAreaSize;
 
         // Binds
         private static List<BindingHandler>? _bindingHandlers;
@@ -100,6 +100,7 @@ namespace RogueLike.Game
             {
                 _bindingHandlers?.Add(new InGamePlayerBindingHandler(InputActionMaps[GameState.InGame]));
                 _bindingHandlers?.Add(new InGameOtherBindingHandler(InputActionMaps[GameState.InGame]));
+                _bindingHandlers?.Add(new DeathScreenBindingHandler(InputActionMaps[GameState.Death]));
             }
 
             if (_bindingHandlers != null)
@@ -135,45 +136,62 @@ namespace RogueLike.Game
             GameLoop?.Stop();
         }
 
+        public static void GenerateAndLoadInGameLevel()
+        {
+            LoadLevel(LevelsGenerator.GenerateInGameLevel());
+
+            if (CurrentLevel as MazeLevel != null)
+            {
+                if (Player == null)
+                {
+                    // Player
+                    RenderObject playerRenderObject = new RenderObject(new RenderBuffer(new string[] { "O" }));
+                    Player = new Player(playerRenderObject, new Collider(playerRenderObject));
+                }
+
+                // todo: change position to random
+                Player.Position = new Vector2Int(16, 5);
+                CurrentLevel.PrepareAddObject(Player);
+
+                // UI
+                TextUI healthTextUI = new TextUI("Health:");
+                healthTextUI.Position = new Vector2Int(5, UIAreaPosition.y + 1);
+                CurrentLevel.PrepareAddObject(healthTextUI);
+
+                if (Player != null)
+                {
+                    TextUI healthValueTextUI = new TextUI(Player.Health.MaxValue.ToString());
+                    healthValueTextUI.Position = healthTextUI.Position + new Vector2Int(healthTextUI.TextLength + 1, 0);
+                    // todo: Вынести в скрипт UI Handler
+                    Player.Health.ValueChanged += (prevHP, newHP) => healthValueTextUI.Text = newHP.ToString();
+                    CurrentLevel.PrepareAddObject(healthValueTextUI);
+                }
+            }
+
+            ChangeInputActionMap(GameState.InGame);
+        }
+
+        public static void GenerateAndLoadDeathScreenLevel()
+        {
+            LoadLevel(LevelsGenerator.GenerateDeathScreenLevel());
+            ChangeInputActionMap(GameState.Death);
+        }
+
+        public static void ChangeInputActionMap(GameState gameState)
+        {
+            if (_inputActionHandler != null && InputActionMaps != null)
+            {
+                _inputActionHandler.CurrentInputActionMap = InputActionMaps[gameState];
+            }
+            else
+            {
+                throw new Exception("InputActionHandler or InputActionMaps is null");
+            }
+        }
+
         private static void OnLoadLevel()
         {
-            // Maze walls
-            MazeGenerator mazeGenerator = new MazeGenerator('#', (char)RenderBuffer.NullSymbol);
-            RenderObject mazeRenderObject = new RenderObject(mazeGenerator.GetMazeRenderPattern(PlayAreaSize, 7));
-            _maze = new StaticObject(mazeRenderObject, new Collider(mazeRenderObject));
-            _maze.Position = Vector2Int.Zero;
-            CurrentLevel?.PrepareAddObject(_maze);
-
-            // Level exit trigger
-            RenderObject levelExitDoorRenderObject = new RenderObject(new RenderBuffer(new string[] { "E" }));
-            Collider levelExitDoorCollider = new Collider(levelExitDoorRenderObject, true);
-            LevelExitDoor levelExitDoor = new LevelExitDoor(levelExitDoorRenderObject, levelExitDoorCollider);
-            levelExitDoor.Position = new Vector2Int(20, 20);
-            CurrentLevel?.PrepareAddObject(levelExitDoor);
-
-            // Player
-            RenderObject playerRenderObject = new RenderObject(new RenderBuffer(new string[] { "O" }));
-            Player player = new Player(playerRenderObject, new Collider(playerRenderObject));
-            player.Position = new Vector2Int(16, 5);
-            Player = player;
-            CurrentLevel?.PrepareAddObject(player);
-
-            // Test Enemy
-            RenderObject enemyRenderObject = new RenderObject(new RenderBuffer(new string[] { "X" }));
-            Enemy enemy = new Enemy(enemyRenderObject, new Collider(enemyRenderObject));
-            enemy.Position = new Vector2Int(25, 10);
-            CurrentLevel?.PrepareAddObject(enemy);
-
-            // UI
-            TextUI healthTextUI = new TextUI("Health:");
-            healthTextUI.Position = new Vector2Int(5, UIAreaPosition.y + 1);
-            CurrentLevel?.PrepareAddObject(healthTextUI);
-
-            TextUI healthValueTextUI = new TextUI(Player.Health.MaxValue.ToString());
-            healthValueTextUI.Position = healthTextUI.Position + new Vector2Int(healthTextUI.TextLength + 1, 0);
-            // todo: Вынести в скрипт UI Handler
-            Player.Health.ValueChanged += (prevHP, newHp) => healthValueTextUI.Text = Player.Health.Value.ToString();
-            CurrentLevel?.PrepareAddObject(healthValueTextUI);
+            
         }
 
         private static void PreUpdate(double deltaTime)

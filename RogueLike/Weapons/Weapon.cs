@@ -3,7 +3,7 @@ using RogueLike.GameObjects;
 
 namespace RogueLike.Weapons
 {
-    internal abstract class Weapon : IUpdate
+    internal abstract class Weapon : IReadOnlyWeapon, IUpdate
     {
         public event Action<double>? TimerBeforeAttackChange;
 

@@ -10,7 +10,10 @@
         public BindingHandler(InputActionMap inputActionMap)
         {
             _inputActionMap = inputActionMap;
+            InitializeBindsDictionary();
         }
+
+        protected abstract void InitializeBindsDictionary();
 
         public void AddAllBinds()
         {

@@ -26,6 +26,8 @@ namespace RogueLike.Maze
 
     internal class MazeGenerator
     {
+        public static MazeGenerator Shared => new MazeGenerator();
+
         private char _wallSymbol;
         private char _emptySymbol;
 
@@ -35,6 +37,10 @@ namespace RogueLike.Maze
         {
             _wallSymbol = wallSymbol;
             _emptySymbol = emptySymbol;
+        }
+
+        public MazeGenerator() : this('#', (char)RenderBuffer.NullSymbol)
+        {
         }
 
         public RenderBuffer GetMazeRenderPattern(Vector2Int mazeSize, int minCorridorWide = 1, int? seed = null)

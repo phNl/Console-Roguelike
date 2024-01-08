@@ -12,10 +12,9 @@ namespace RogueLike.Input.Bindings
 
         public InGamePlayerBindingHandler(InputActionMap inputActionMap) : base(inputActionMap)
         {
-            InitializeBindsDictionary();
         }
 
-        private void InitializeBindsDictionary()
+        protected override void InitializeBindsDictionary()
         {
             _binds.AddBind(ConsoleKey.W, MovePlayerUp);
             _binds.AddBind(ConsoleKey.S, MovePlayerDown);

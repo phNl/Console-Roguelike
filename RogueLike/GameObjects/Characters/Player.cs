@@ -1,5 +1,8 @@
 ﻿using RogueLike.Collision;
 using RogueLike.CustomMath;
+using RogueLike.Game;
+using RogueLike.Game.Levels;
+using RogueLike.GameObjects.UI;
 using RogueLike.Render;
 using RogueLike.Weapons;
 
@@ -22,7 +25,7 @@ namespace RogueLike.GameObjects.Characters
         // todo: Сделать смену на экран смерти (просто текст и опции перезапуска/выхода из игры по нажатию биндов)
         public override void Kill()
         {
-            athrow new NotImplementedException();
+            GameController.GenerateAndLoadDeathScreenLevel();
         }
 
         // todo: Remove this

@@ -1,6 +1,7 @@
 ﻿using RogueLike.Collision;
 using RogueLike.CustomMath;
 using RogueLike.Game;
+using RogueLike.Game.Levels;
 using RogueLike.GameObjects.Characters;
 using RogueLike.Render;
 
@@ -18,12 +19,6 @@ namespace RogueLike.GameObjects
             GameController.OnPlayerChanged += UpdateSubscriptionToPlayer;
         }
 
-        private void LoadNewLevel()
-        {
-            Level level = new Level();
-            GameController.LoadLevel(level);
-        }
-
         private void CheckCollision(Vector2Int direction)
         {
             if (GameController.Player != null && !_isTriggered)
@@ -33,7 +28,7 @@ namespace RogueLike.GameObjects
                 {
                     OnPlayerTriggered?.Invoke();
                     _isTriggered = true;
-                    LoadNewLevel();
+                    GameController.GenerateAndLoadInGameLevel();
                 }
             }
         }

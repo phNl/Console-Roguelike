@@ -14,7 +14,8 @@ namespace RogueLike
         static void Main(string[] args)
         {
             GameController.Initialize(new Vector2Int(120, 60));
-            GameController.LoadLevel(new Level());
+            //GameController.GenerateAndLoadDeathScreenLevel();
+            GameController.GenerateAndLoadInGameLevel();
         }
 
         public static void Quit()

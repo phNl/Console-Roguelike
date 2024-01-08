@@ -1,8 +1,8 @@
 ﻿using RogueLike.GameObjects;
 
-namespace RogueLike.Game
+namespace RogueLike.Game.Levels
 {
-    internal class Level
+    internal abstract class Level
     {
         private List<GameObject> _objects;
         public IReadOnlyList<GameObject> Objects => new List<GameObject>(_objects);
@@ -33,7 +33,6 @@ namespace RogueLike.Game
         {
             foreach (GameObject obj in _objectsToRemove)
             {
-                //obj.OnDestroyAction -= PrepareRemoveObject;
                 _objects.Remove(obj);
             }
 
@@ -44,11 +43,15 @@ namespace RogueLike.Game
         {
             foreach (GameObject obj in _objectsToAdd)
             {
-                _objects.Add(obj);
-                //obj.OnDestroyAction += PrepareRemoveObject;
+                AddObjectImmediately(obj);
             }
 
             _objectsToAdd.Clear();
+        }
+
+        public void AddObjectImmediately(GameObject obj)
+        {
+            _objects.Add(obj);
         }
     }
 }
