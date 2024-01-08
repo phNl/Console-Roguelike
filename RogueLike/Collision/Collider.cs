@@ -4,6 +4,8 @@ namespace RogueLike.Collision
 {
     internal struct Collider
     {
+        public static Collider Empty => new Collider();
+
         private readonly CollisionMap _collisionMap;
         public IReadOnlyCollisionMap CollisionMap => _collisionMap;
 

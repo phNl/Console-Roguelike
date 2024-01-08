@@ -2,6 +2,7 @@
 using RogueLike.CustomMath;
 using RogueLike.GameObjects;
 using RogueLike.GameObjects.Characters;
+using RogueLike.GameObjects.UI;
 using RogueLike.Input;
 using RogueLike.Input.Bindings;
 using RogueLike.Maze;
@@ -56,6 +57,12 @@ namespace RogueLike.Game
         private static bool _isInitialized = false;
         public static bool IsInitialized => _isInitialized;
 
+        private static Vector2Int _playAreaSize;
+        public static Vector2Int PlayAreaSize => _playAreaSize;
+
+        private static Vector2Int UIAreaPosition => new Vector2Int(0, PlayAreaSize.y);
+        private static Vector2Int UIAreaSize => LevelSize - PlayAreaSize;
+
         // Binds
         private static List<BindingHandler>? _bindingHandlers;
 
@@ -81,6 +88,8 @@ namespace RogueLike.Game
             _bindingHandlers = new List<BindingHandler>();
             InitializeBindingHandlers();
 
+            _playAreaSize = LevelSize - new Vector2Int(0, 5);
+
             _isInitialized = true;
         }
 
@@ -90,6 +99,7 @@ namespace RogueLike.Game
             if (InputActionMaps != null)
             {
                 _bindingHandlers?.Add(new InGamePlayerBindingHandler(InputActionMaps[GameState.InGame]));
+                _bindingHandlers?.Add(new InGameOtherBindingHandler(InputActionMaps[GameState.InGame]));
             }
 
             if (_bindingHandlers != null)
@@ -112,11 +122,24 @@ namespace RogueLike.Game
             _inputActionHandler?.Unpause();
         }
 
+        public static void OnGameLoopTick(double deltaTime)
+        {
+            PreUpdate(deltaTime);
+            Update(deltaTime);
+            AfterUpdate(deltaTime);
+            RenderUpdate();
+        }
+
+        public static void QuitGame()
+        {
+            GameLoop?.Stop();
+        }
+
         private static void OnLoadLevel()
         {
             // Maze walls
             MazeGenerator mazeGenerator = new MazeGenerator('#', (char)RenderBuffer.NullSymbol);
-            RenderObject mazeRenderObject = new RenderObject(mazeGenerator.GetMazeRenderPattern(LevelSize, 7));
+            RenderObject mazeRenderObject = new RenderObject(mazeGenerator.GetMazeRenderPattern(PlayAreaSize, 7));
             _maze = new StaticObject(mazeRenderObject, new Collider(mazeRenderObject));
             _maze.Position = Vector2Int.Zero;
             CurrentLevel?.PrepareAddObject(_maze);
@@ -140,13 +163,17 @@ namespace RogueLike.Game
             Enemy enemy = new Enemy(enemyRenderObject, new Collider(enemyRenderObject));
             enemy.Position = new Vector2Int(25, 10);
             CurrentLevel?.PrepareAddObject(enemy);
-        }
 
-        public static void OnGameLoopTick(double deltaTime)
-        {
-            PreUpdate(deltaTime);
-            Update(deltaTime);
-            AfterUpdate(deltaTime);
+            // UI
+            TextUI healthTextUI = new TextUI("Health:");
+            healthTextUI.Position = new Vector2Int(5, UIAreaPosition.y + 1);
+            CurrentLevel?.PrepareAddObject(healthTextUI);
+
+            TextUI healthValueTextUI = new TextUI(Player.Health.MaxValue.ToString());
+            healthValueTextUI.Position = healthTextUI.Position + new Vector2Int(healthTextUI.TextLength + 1, 0);
+            // todo: Вынести в скрипт UI Handler
+            Player.Health.ValueChanged += (prevHP, newHp) => healthValueTextUI.Text = Player.Health.Value.ToString();
+            CurrentLevel?.PrepareAddObject(healthValueTextUI);
         }
 
         private static void PreUpdate(double deltaTime)
@@ -162,8 +189,11 @@ namespace RogueLike.Game
             {
                 foreach (var obj in CurrentLevel.Objects)
                 {
-                    if (GameLoop != null)
-                        obj.Update(deltaTime);
+                    obj.Update(deltaTime);
+                    if (obj.IsPreparedToDestroy)
+                    {
+                        CurrentLevel.PrepareRemoveObject(obj);
+                    }
                 }
             }
         }
@@ -171,7 +201,6 @@ namespace RogueLike.Game
         private static void AfterUpdate(double deltaTime)
         {
             CurrentLevel?.RemovePreparedObjects();
-            RenderUpdate();
         }
 
         private static void RenderUpdate()

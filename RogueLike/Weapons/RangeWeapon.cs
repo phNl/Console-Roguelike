@@ -30,7 +30,6 @@ namespace RogueLike.Weapons
             RenderObject bulletRenderObject = new RenderObject(new RenderBuffer(new string[] { "*" }));
             Collider bulletCollider = new Collider(bulletRenderObject, true);
             Bullet bullet = new Bullet(bulletRenderObject, bulletCollider, Damage);
-            bullet.Collider = bulletCollider;
 
             bullet.Position = position + direction;
             GameController.CurrentLevel?.PrepareAddObject(bullet);

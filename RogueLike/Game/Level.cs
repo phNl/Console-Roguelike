@@ -33,11 +33,11 @@ namespace RogueLike.Game
         {
             foreach (GameObject obj in _objectsToRemove)
             {
+                //obj.OnDestroyAction -= PrepareRemoveObject;
                 _objects.Remove(obj);
-                obj.OnDestroyAction -= PrepareRemoveObject;
             }
 
-            _objectsToRemove = new List<GameObject>();
+            _objectsToRemove.Clear();
         }
 
         public void AddPreparedObjects()
@@ -45,10 +45,10 @@ namespace RogueLike.Game
             foreach (GameObject obj in _objectsToAdd)
             {
                 _objects.Add(obj);
-                obj.OnDestroyAction += PrepareRemoveObject;
+                //obj.OnDestroyAction += PrepareRemoveObject;
             }
 
-            _objectsToAdd = new List<GameObject>();
+            _objectsToAdd.Clear();
         }
     }
 }

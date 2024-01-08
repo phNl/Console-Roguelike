@@ -22,7 +22,7 @@ namespace RogueLike.GameObjects.Characters
         // todo: Сделать смену на экран смерти (просто текст и опции перезапуска/выхода из игры по нажатию биндов)
         public override void Kill()
         {
-            throw new NotImplementedException();
+            athrow new NotImplementedException();
         }
 
         // todo: Remove this

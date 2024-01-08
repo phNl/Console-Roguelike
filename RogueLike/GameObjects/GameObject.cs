@@ -7,25 +7,34 @@ namespace RogueLike.GameObjects
     internal abstract class GameObject : IUpdate
     {
         public event Action<GameObject>? OnDestroyAction;
+        public event Action<Vector2Int, Vector2Int>? PositionChanged;
 
-        private Vector2Int _position = Vector2Int.Zero;
+        private Vector2Int __position = Vector2Int.Zero;
         public Vector2Int Position {
-            get => _position;
-            set => _position = value;
+            get => __position;
+            set
+            {
+                if (__position != value)
+                {
+                    var prevPos = __position;
+                    __position = value;
+                    PositionChanged?.Invoke(prevPos, __position);
+                }
+            }
         }
 
         private Collider _collider;
         public Collider Collider
         {
             get => _collider;
-            set => _collider = value;
+            protected set => _collider = value;
         }
 
         private RenderObject _renderObject;
         public RenderObject RenderObject
         {
             get => _renderObject;
-            set => _renderObject = value;
+            protected set => _renderObject = value;
         }
 
         private bool _isPreparedToDestroy = false;
@@ -49,7 +58,7 @@ namespace RogueLike.GameObjects
         {
             _isPreparedToDestroy = true;
             OnDestroy();
-            OnDestroyAction?.Invoke(this);
+            //OnDestroyAction?.Invoke(this);
         }
 
         protected virtual void OnUpdate(double deltaTime)

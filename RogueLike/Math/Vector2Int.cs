@@ -209,8 +209,8 @@
 
         public bool InRectangle(Vector2Int minPoint, Vector2Int maxPoint)
         {
-            if (minPoint >= maxPoint && minPoint != maxPoint)
-                throw new Exception("FirstPoint cannot be greater than SecondPoint");
+            if (minPoint > maxPoint && minPoint != maxPoint)
+                throw new Exception("minPoint cannot be greater than maxPoint");
 
             return x >= minPoint.x && x <= maxPoint.x && y >= minPoint.y && y <= maxPoint.y;
         }

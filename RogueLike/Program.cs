@@ -15,10 +15,6 @@ namespace RogueLike
         {
             GameController.Initialize(new Vector2Int(120, 60));
             GameController.LoadLevel(new Level());
-
-            while (!IsQuit)
-            {
-            }
         }
 
         public static void Quit()
