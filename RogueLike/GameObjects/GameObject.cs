@@ -58,7 +58,6 @@ namespace RogueLike.GameObjects
         {
             _isPreparedToDestroy = true;
             OnDestroy();
-            //OnDestroyAction?.Invoke(this);
         }
 
         protected virtual void OnUpdate(double deltaTime)
